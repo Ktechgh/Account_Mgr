@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account_Mgr</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+  <meta name="csrf-token_" content="{{ csrf_token() }}" />
+
+  <link rel="icon" href="{{ url_for('static', filename='icons/web2.png') }}" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_model.css') }}" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/flash.css') }}" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/transaction_report.css') }}" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cash_report.css') }}" />
+</head>
+
+<body data-logout-url="{{ logout_url }}" data-page="sales">
+  {% block top_navbar %}
+  <header class="topbar">
+    <div class="topbar-left">
+      <i class="fas fa-angle-double-left toggle-sidebar"></i>
+      <div class="input-group">
+        <form class="d-flex">
+          <input type="text" class="form-control" placeholder="Search item..." />
+          <button class="btn btn-success" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="user-profile">
+      <img src="{{ image_file }}" alt="User" />
+      <span>{{ current_user.username }}</span>
+      <i class="fas fa-chevron-down"></i>
+      <div class="dropdown-menu">
+        <ul>
+          <li>
+            <a href="#settings"> <i class="fas fa-cog"></i> Settings </a>
+          </li>
+          <li>
+            <a href="#account"> <i class="fas fa-user"></i> Account </a>
+          </li>
+          <li>
+            <a href="#theme" id="theme-toggle">
+              <i class="fas fa-moon"></i> Theme
+            </a>
+          </li>
+          {% block logout %}
+          <li>
+            <a href="{{ url_for('super_admin_secure.super_admin_logout')}}">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </li>
+          {% endblock logout %}
+        </ul>
+      </div>
+    </div>
+  </header>
+  {% endblock top_navbar %}
+
+  <div class="main-section">
+    {% block sidebar %}
+    <aside class="sidebar">
+      <div class="logo">
+        <i class="fas fa-store"></i>
+        Account Manager
+      </div>
+      <hr />
+      <ul class="nav-menu">
+        {% block home %}
+        <li>
+          <a href="{{ url_for('super_admin_secure.secure_adashboard')}}" class="active">
+            <i class="fas fa-home"></i> Home
+          </a>
+        </li>
+        {% endblock home %}
+
+        {% block users %}
+        <li class="has-submenu">
+          <a href="#!">
+            <i class="fas fa-users"></i>
+            User Mgt
+            <i class="fas fa-chevron-right arrow"></i>
+          </a>
+          <ul class="submenu">
+            {% block userprofile_ %}
+            <li>
+              <a href="{{ url_for('attendants_registration.add_attendant')}}">Add CSA</a>
+            </li>
+            <li>
+              <a href="{{ url_for('account_.secure_account_update')}}">Edit profile</a>
+            </li>
+            {% endblock userprofile_ %} 
+            
+            {% block userpassword_ %}
+            <li>
+              <a href="{{ url_for('account_.reset_request')}}">Reset password</a>
+            </li>
+            {% endblock userpassword_ %}
+          </ul>
+        </li>
+        {% endblock users %}
+
+        {% block reports %}
+        <li>
+          <a href="{{ url_for('transactions_bp.transaction_report') }}" class="trans-report-trigger">
+            <i class="fas fa-chart-bar"></i>
+            Trans Report
+          </a>
+        </li>
+        {% endblock reports %}
+
+        {% block cashsummary_nav %}
+        <li>
+          <a href="" class="cash-summary-trigger">
+            <i class="fas fa-coins"></i>
+            Cash Summary
+          </a>
+        </li>
+        {% endblock cashsummary_nav %}
+      </ul>
+    </aside>
+    {% endblock sidebar %}
+
+    {% block cashsummary_modal %}
+    <div id="cashSummaryModal" class="custom-modal-cashsummary">
+      <div class="custom-modal-content-cashsummary">
+        <span class="close-cash-summary">&times;</span>
+        <h3>Cash Summary Report</h3>
+        <hr />
+        <form method="post" action="{{ url_for('transactions_bp.cash_summary') }}">
+          {{ summary_form.hidden_tag() }}
+          <div class="col mb-3">
+            {{ summary_form.cash_report_type(class="form-select") }}
+          </div>
+    
+          <div class="col mb-3">
+            {{ summary_form.start_date.label() }}
+            {{ summary_form.start_date(class="form-control") }}
+          </div>
+    
+          <div class="col mb-3">
+            {{ summary_form.end_date.label() }}
+            {{ summary_form.end_date(class="form-control") }}
+          </div>
+    
+          <div class="modal-footer">
+            {{ summary_form.submit(class="btn btn-success btn-md custom-wide-button btn-md", id="cashsummary-btn") }}
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% endblock cashsummary_modal %}
+
+    <!-- Transaction Report Modal -->
+    {% block transreport_modal %}
+    <div id="transReportModal" class="custom-modal-rport">
+      <div class="custom-modal-content-rport">
+        <span class="close-trans-report">&times;</span>
+        <h3>Transaction Report</h3>
+        <hr />
+        <form method="post" action="{{ url_for('transactions_bp.transaction_report') }}">
+          {{ report.hidden_tag() }}
+          <div class="col">
+            {{ report.report_type(class="form-control mb-3") }}
+          </div>
+
+          <div class="col">
+            {{ report.start_date.label() }} {{
+            report.start_date(class="form-control mb-3") }}
+          </div>
+
+          <div class="col">
+            {{ report.end_date.label() }} {{
+            report.end_date(class="form-control mb-3") }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-md" data-dismiss="modal">
+              Close
+            </button>
+            {{ report.submit(class="btn btn-success btn-md custom-wide-button
+            btn-md", id="checkout-btn") }}
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endblock transreport_modal %}
+
+    {% block main_content %}
+    <div class="main-content">
+      {% block content_header %}
+
+      <!-- ================= S1/S2 ================= -->
+      <div class="custom-card-header mb-3">
+        <h3>Click plus button to enter meter readings.</h3>
+        <button class="add-btn" id="openModalBtn_s1s2">+</button>
+      </div>
+
+      <!-- Bootstrap Stepper Modal -->
+      <div class="modal fade" id="stepperModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-light">
+              <h5 class="modal-title">Account Manager</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+      
+            <div class="modal-body">
+              <!-- Progressbar -->
+              <ul class="progressbar mb-4">
+                <li class="active" data-step="step1">S1-S2</li>
+                <li data-step="step2">S3-S4</li>
+                <li data-step="step3">D1-D4</li>
+                <li data-step="step4">Stock</li>
+              </ul>
+      
+              <!-- Step 1 -->
+              <form method="POST" id="step1" class="step active">
+                {{ s1s2_form.hidden_tag() }}
+                <h5 class="text-center mb-3 text-danger">S1 & S2 Details</h5>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">{{ s1s2_form.super_1_opening(class="form-control") }}</div>
+                  <div class="col-md-6">{{ s1s2_form.super_1_closing(class="form-control") }}</div>
+                  <div class="col-md-6">{{ s1s2_form.super_2_opening(class="form-control") }}</div>
+                  <div class="col-md-6">{{ s1s2_form.super_2_closing(class="form-control") }}</div>
+
+                  <div class="col-md-6">{{ s1s2_form.gsa_test_draw(class="form-control text-danger") }}</div>
+                  <div class="col-md-6">{{ s1s2_form.liters_sold(class="form-control text-danger") }}</div>
+                </div>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label class="form-label text-danger fw-medium">Sale Date</label>
+                    {{ s1s2_form.date_of_sale(class="form-control", id="date_of_sale_s1s2") }}
+                    <button type="button" id="fetchMeterBtn_s1s2" class="btn btn-primary mt-3 w-100">
+                      Get Opening Meters
+                    </button>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Price</label>
+                    {{ s1s2_form.price(class="form-control") }}
+                    {{ s1s2_form.csa_name(class="form-control mt-3") }}
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Grand Total</label>
+                    {{ s1s2_form.total(class="form-control text-danger") }}
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-primary next ms-2" data-next="step2">Next →</button>
+                </div>
+              </form>
+      
+              <!-- Step 2 -->
+              <form method="POST" id="step2" class="step">
+                {{ s3s4_form.hidden_tag() }}
+                <h5 class="text-center mb-3 text-danger">S3 & S4 Details</h5>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">{{ s3s4_form.super_1_opening(class="form-control", placeholder="S3 (Opening)") }}</div>
+                  <div class="col-md-6">{{ s3s4_form.super_1_closing(class="form-control", placeholder="S3 (Closing)") }}</div>
+                  <div class="col-md-6">{{ s3s4_form.super_2_opening(class="form-control", placeholder="S4 (Opening)") }}</div>
+                  <div class="col-md-6">{{ s3s4_form.super_2_closing(class="form-control", placeholder="S4 (Closing)") }}</div>
+                  <div class="col-md-6">{{ s3s4_form.gsa_test_draw(class="form-control") }}</div>
+                  <div class="col-md-6">{{ s3s4_form.liters_sold(class="form-control text-danger") }}</div>
+                </div>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label class="form-label text-danger fw-medium">Sale Date</label>
+                    {{ s3s4_form.date_of_sale(class="form-control", id="date_of_sale_s3s4") }}
+                    <button type="button" id="fetchMeterBtn_s3s4" class="btn btn-primary mt-3 w-100">
+                      Get Opening Meters
+                    </button>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Price</label>
+                    {{ s3s4_form.price(class="form-control") }}
+                    {{ s3s4_form.csa_name(class="form-control mt-3") }}
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Grand Total</label>
+                    {{ s3s4_form.total(class="form-control text-danger") }}
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-secondary prev" data-prev="step1">← Back</button>
+                  <button class="btn btn-primary next ms-2" data-next="step3">Next →</button>
+                </div>
+              </form>
+      
+              <!-- Step 3 -->
+              <form method="POST" id="step3" class="step">
+                {{ d1d4_form.hidden_tag() }}
+                <h5 class="text-center mb-3 text-success">D1 - D4 Details</h5>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">{{ d1d4_form.d1_opening(class="form-control") }}</div>
+                  <div class="col-md-6">{{ d1d4_form.d1_closing(class="form-control") }}</div>
+              
+                  <div class="col-md-6">{{ d1d4_form.d2_opening(class="form-control") }}</div>
+                  <div class="col-md-6">{{ d1d4_form.d2_closing(class="form-control") }}</div>
+              
+                  <div class="col-md-6">{{ d1d4_form.d3_opening(class="form-control") }}</div>
+                  <div class="col-md-6">{{ d1d4_form.d3_closing(class="form-control") }}</div>
+              
+                  <div class="col-md-6">{{ d1d4_form.d4_opening(class="form-control") }}</div>
+                  <div class="col-md-6">{{ d1d4_form.d4_closing(class="form-control") }}</div>
+              
+                  <div class="col-md-6">{{ d1d4_form.rtt_liters(class="form-control") }}</div>
+                  <div class="col-md-6">{{ d1d4_form.liters_sold(class="form-control text-danger") }}</div>
+                </div>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label class="form-label text-danger fw-medium">Sale Date</label>
+                    {{ d1d4_form.date_of_sale(class="form-control", id="date_of_sale_d1d4") }}
+                    <button type="button" id="fetchMeterBtn_d1d4" class="btn btn-primary mt-3 w-100">
+                      Get Opening Meters
+                    </button>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Price</label>
+                    {{ d1d4_form.price(class="form-control") }}
+                    {{ d1d4_form.csa_name(class="form-control mt-3") }}
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Grand Total</label>
+                    {{ d1d4_form.total(class="form-control text-danger") }}
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-secondary prev" data-prev="step2">← Back</button>
+                  <button class="btn btn-primary next ms-2" data-next="step4">Next →</button>
+                </div>
+              </form>
+      
+              <!-- Step 4 -->
+              <form method="POST" id="step4" class="step">
+                <h5 class="text-center mb-3 text-primary">Stock/Variation Details</h5>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6"><input type="text" class="form-control" placeholder="Opening Stock" /></div>
+                  <div class="col-md-6"><input type="text" class="form-control" placeholder="Closing Stock" /></div>
+                  <div class="col-md-6"><input type="text" class="form-control" placeholder="Stock Received" /></div>
+                  <div class="col-md-6"><input type="text" class="form-control" placeholder="Stock Sold" /></div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-secondary prev" data-prev="step3">← Back</button>
+                </div>
+              </form>
+            </div>
+      
+            <!-- Footer (global for all steps) -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              {{ s1s2_form.submit_meter(class="btn btn-success active", id="submit_s1s2", form="step1") }}
+              {{ s3s4_form.submit_s3s4(class="btn btn-success d-none", id="submit_s3s4", form="step2") }}
+              {{ d1d4_form.submit_d1d4(class="btn btn-success d-none", id="submit_d1d4", form="step3") }}
+              <button type="submit" id="submit_stock" class="btn btn-success d-none">Finish ✔</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End of Bootstrap Stepper Modal -->
+
+      <form method="POST">
+        {{ credit_form.hidden_tag() }}
+        {{ paper_form.hidden_tag() }}
+        {{ coins_form.hidden_tag() }}
+        <div class="section-card mt-3">
+          <div class="table-responsive">
+            <table id="table_s1s2" class="table table-bordered">
+              <thead>
+                <tr>
+                  <div class="mb-3 d-flex align-items-center justify-content-between mt-1">
+                    <!-- Meter Table Dropdown -->
+                    <div class="d-flex align-items-center">
+                      {{ section_form.section.label(class="fw-bold text-primary me-1") }}
+                      {{ section_form.section(class="form-select w-auto", id="section") }}
+                    </div>
+                  
+                    <!-- Edit Buttons aligned to right -->
+                    <div class="d-flex align-items-center">
+                      {% for cs in sessions %}
+                      <a href="{{ url_for('super_admin_secure.edit_session', session_id=cs.id) }}" class="btn btn-sm btn-warning ms-2">
+                        <i class="fas fa-edit">Edit</i>
+                        {{ cs.section
+                        | replace("S1S2", "S1 & S2")
+                        | replace("S3S4", "S3 & S4")
+                        | replace("D1D4", "D1 & D4")
+                        | replace("Stock", "Stock") }}
+                      </a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </tr>
+                <hr class="divider" />
+                <input type="hidden" name="selected_section" id="selected_section" value="{{ section_form.section.data }}" />
+                <tr>
+                  <th class="text-danger">Transactions (Electronic & Credit)</th>
+                  <th class="text-danger">Cash - Paper Denominations</th>
+                  <th class="text-danger">Cash - Coins Denominations</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ credit_form.gcb(id="gcb", class="form-control") }}</td>
+                  <td>{{ paper_form.note_200(id="note_200", class="form-control", **{'data-denom': 200} )}}</td>
+                  <td>{{ coins_form.coin_2(id="coin_2", class="form-control", **{'data-denom': 2} )}}</td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.momo(id="momo", class="form-control") }}</td>
+                  <td>{{ paper_form.note_100(id="note_100", class="form-control", **{'data-denom': 100} )}}</td>
+                  <td>{{ coins_form.coin_1(id="coin_1", class="form-control", **{'data-denom': 1} )}}</td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.tingg(id="tingg", class="form-control") }}</td>
+                  <td>{{ paper_form.note_50(class="form-control") }}</td>
+                  <td>{{ coins_form.coin_5(id="coin_5", class="form-control", **{'data-denom': 0.5} )}}</td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.zenith(id="zenith", class="form-control") }}</td>
+                  <td>{{ paper_form.note_20(id="note_20", class="form-control", **{'data-denom': 20} )}}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.republic(id="republic", class="form-control") }}</td>
+                  <td>{{ paper_form.note_10(id="note_10", class="form-control", **{'data-denom': 10} )}}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.prudential(id="prudential", class="form-control") }}</td>
+                  <td>{{ paper_form.note_5(id="note_5", class="form-control", **{'data-denom': 5} )}}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.adb(id="adb", class="form-control") }}</td>
+                  <td>{{ paper_form.note_2(id="note_2", class="form-control", **{'data-denom': 2} )}}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.stanbic(id="stanbic", class="form-control") }}</td>
+                  <td>{{ paper_form.note_1(id="note_1", class="form-control", **{'data-denom': 1} ) }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.ecobank(id="ecobank", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.fidelity(id="fidelity", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.credit_ab(id="credit_ab", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.credit_cf(id="credit_cf", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.credit_wl(id="credit_wl", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.credit_zl(id="credit_zl", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.credit_gc(id="credit_gc", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.soc_staff_credit(id="soc_staff_credit", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.water_bill(id="water_bill", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.ecg_bill(id="ecg_bill", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.genset(id="genset", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.approve_miscellaneous(id="approve_miscellaneous", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <td colspan="4" class="text-bg-secondary">
+                  <i class="fa fa-arrow-up"></i> Credits |
+                  <i class="fa fa-arrow-down"></i> Collections
+                </td>
+                <tr>
+                  <td>{{ credit_form.collection_wl(id="collection_wl", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.collection_zl(id="collection_zl", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.collection_gc(id="collection_gc", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.collection_ab(id="collection_ab", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.collection_cv(id="collection_cv", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.lube_1_liter(id="lube_1_liter", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.lube_drum(id="lube_drum", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>{{ credit_form.duster_collection(id="duster_collection", class="form-control") }}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+
+                <!-- Totals -->
+                <tr>
+                  <td class="text-danger fw-semibold">Total Trans (Electronic & Credit)</td>
+                  <td>{{ credit_form.total_credit(id="total_credit", class="form-control light-green") }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="text-danger fw-semibold">Total Credit Sales Collection</td>
+                  <td>{{ credit_form.total_collection(id="total_collection", class="form-control light-green") }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="text-success fw-semibold">Grand Total Sales (Liters x Price)</td>
+                  <td>{{ credit_form.grand_total(id="grand_total", class="form-control light-green") }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="text-danger fw-semibold">Paper & Coins Denomination Column</td>
+                  <td>{{ credit_form.paper_total(id="paper_total") }}</td>
+                  <td>{{ credit_form.coin_total(id="coin_total") }}</td>
+                </tr>
+                <tr>
+                  <td class="text-black fw-semibold">Total Physical Cash</td>
+                  <td colspan="1">{{ credit_form.total_physical_cash(id="total_physical_cash") }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td class="text-success fw-semibold">Denonination Status</td>
+                  <td colspan="2" class="d-flex align-items-center gap-2">
+                    {{ credit_form.cash_balance_status(id="cash_balance_status") }}
+                  </td>
+                  <td></td>
+                </tr>
+              </tbody>
+
+              <!-- FOOTER ROW -->
+              <tfoot>
+                <tr>
+                  <td colspan="4" class="text-center text-bg-light">
+                    <div class="d-flex justify-content-end gap-3">
+                      <button type="submit" name="submit_denomination" class="btn btn-primary btn-sm">
+                        Save Denominations
+                      </button>
+                      {{ credit_form.submit_credit(class="btn btn-primary px-4") }}
+                    </div>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div class="cash-to-bank">
+            <label for="cash_to_bank">Cash to bank:</label>
+            <input type="text" id="cash_to_bank" class="form-control light-green cash-input" readonly />
+          </div>
+        </div>
+      </form>
+      {% endblock content_header %}
+
+      {% block dashboard_container %}
+      {% endblock dashboard_container %}
+
+      <br>
+      {% block table_container %}
+      {% endblock table_container %}
+
+      {% block line_charts %}
+      {% endblock line_charts %}
+
+      {% block bar_charts %}
+      {% endblock bar_charts %}
+
+      {% block pie_charts %}
+      {% endblock pie_charts %}
+
+      <button id="scrollTopBtn" title="Go to top">&#8679;</button>
+    </div>
+    {% endblock main_content %}
+  </div>
+
+  <!-- Footer section -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 | Powered by Kennartech |</p>
+    </div>
+  </footer>
+
+  <!-- Include the flash message section here -->
+  {% include 'flash_message.html' %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/flash_remove_dom.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/auto_logout.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/custom_report_modals.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/per_page.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/custom_model.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/meters.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/opening_meter.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/switch_button.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/delete_confirm.js') }}"></script>
+</body>
+</html>
+
+
+
+
+
+
+                
+                
+                
+                

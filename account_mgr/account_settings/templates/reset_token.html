@@ -1,0 +1,46 @@
+{% extends "signup.html" %}
+
+<title>{% block title %}New Password{% endblock title %}</title>
+
+{% block user_profile %} 
+{% endblock user_profile %}
+
+{% block password %} 
+{% endblock password %}
+
+{% block account %}
+<li class="nav-item">
+  <a class="nav-link" id="createLink">New Password</a>
+</li>
+{% endblock account %}
+
+{% block forgot_password %} 
+{% endblock forgot_password %}
+
+{% block form %}
+<div id="create" class="form-container">
+  <h4 class="text-danger">New Password</h4>
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.password(class="form-control mb-1") }}
+      {% for error in form.password.errors %}
+        <div class="text-danger small">
+          {{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.confirm_password(class="form-control mb-1") }}
+      {% for error in form.confirm_password.errors %}
+        <div class="text-danger small">
+          {{ error }}
+        </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-success">Create New Password</button>
+  </form>
+</div>
+{% endblock form %}
+

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE-edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {% block head %}
+    <title>{% block title %}Flask QuickStart{% endblock title %}</title>
+    {% endblock head %}
+
+    <link rel="icon" href="#" />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/flash.css')}}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/footer.css')}}"
+    />
+  </head>
+  <body>
+    {% block body %}
+    <div class="flash--message">
+      {% with messages = get_flashed_messages(with_categories=True) %} {% if
+      messages %} {% for category, message in messages %} {% if category ==
+      "error" %}
+
+      <div class="alert alert-danger alter-dismissable fade show" role="alert">
+        <!-- <i class="fa-solid fa-circle-xmark"></i> -->
+        {{ message }}
+      </div>
+
+      {% else %}
+      <div class="alert alert-success alter-dismissable fade show" role="alert">
+        <!-- <i class="fa-solid fa-circle-check"></i> -->
+        {{ message }} {% endif %}{% endfor %}{% endif %}{% endwith %}
+      </div>
+    </div>
+    {% block content %}{% endblock content %} {% endblock body %}
+
+    <!-- footer  -->
+    {% block footer %}
+    <div class="footer">
+      <div class="footer-bottom">
+        &copy; Copyright 2025 Flask Quick Start Generator
+      </div>
+    </div>
+    {% endblock footer %}
+  </body>
+</html>

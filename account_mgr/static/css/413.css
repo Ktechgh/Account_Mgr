@@ -1,0 +1,174 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1c40f;
+  color: #333;
+}
+
+.container {
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 7rem;
+  color: #e74c3c;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  color: #2c3e50;
+}
+
+button {
+  padding: 0.75rem 2rem;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #c0392b;
+}
+
+/* File Icon */
+.file-icon {
+  position: relative;
+  width: 150px;
+  height: 180px;
+  margin: 0 auto 20px;
+}
+
+.file {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  border: 5px solid #e74c3c;
+  border-radius: 10px;
+  position: relative;
+  animation: shake 2s infinite ease-in-out;
+}
+
+.fold {
+  width: 50px;
+  height: 50px;
+  background-color: #f1c40f;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  border-top-left-radius: 10px;
+  transform: rotate(45deg);
+}
+
+.exceed-text {
+  position: absolute;
+  bottom: -30px;
+  width: 100%;
+  color: #e74c3c;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  animation: fade-in 2s infinite alternate;
+}
+
+/* Animation */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-5px, 5px);
+  }
+  50% {
+    transform: translate(5px, -5px);
+  }
+  75% {
+    transform: translate(-5px, -5px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  h1 {
+    font-size: 5rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  button {
+    font-size: 1rem;
+  }
+
+  .file-icon {
+    width: 120px;
+    height: 150px;
+  }
+
+  .exceed-text {
+    font-size: 1.25rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  h1 {
+    font-size: 4rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+
+  button {
+    font-size: 0.9rem;
+  }
+
+  .file-icon {
+    width: 100px;
+    height: 120px;
+  }
+
+  .exceed-text {
+    font-size: 1rem;
+  }
+}

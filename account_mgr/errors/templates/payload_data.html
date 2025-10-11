@@ -1,0 +1,27 @@
+
+{% extends "base.html" %} 
+
+{% block head %}
+<title>{% block title %}File Too Large{% endblock title %}</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/413.css')}}" />
+{% endblock head %} 
+
+{% block body %} 
+{% block content %}
+<div class="container">
+  <div class="file-icon">
+    <div class="file">
+      <div class="fold"></div>
+    </div>
+    <div class="exceed-text">TOO LARGE</div>
+  </div>
+  <h1>413</h1>
+  <h2>Payload Too Large</h2>
+  <p>The file or request data you tried to upload exceeds the allowed limit.</p>
+  <button id="go-back-btn">Go Back</button>
+</div>
+
+{% endblock content %}
+<script src="{{ url_for('static', filename='js/error_pages_all.js')}}"></script>
+{% endblock body %}

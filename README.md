@@ -1,2 +1,2 @@
 # Account_Manager
-Account manager is use to close daily account
+A software for closing daily account at filling station

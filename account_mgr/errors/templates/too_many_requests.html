@@ -1,0 +1,28 @@
+
+{% extends "base.html" %} 
+
+{% block head %}
+<title>{% block title %}Too Many Requests{% endblock title %}</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/429.css')}}" />
+{% endblock head %} 
+
+{% block body %} 
+{% block content %}
+<div class="container">
+  <div class="error-message">
+    <h1>429</h1>
+    <h2>Too Many Requests</h2>
+    <p>You've sent too many requests in a short time. Please wait.</p>
+    <div class="timer">
+      <span id="countdown">10</span>
+      <p>seconds remaining</p>
+    </div>
+    <button id="retry-btn">Retry</button>
+    <!-- Assign an id to the button -->
+  </div>
+</div>
+
+{% endblock content %}
+<script src="{{ url_for('static', filename='js/too_many.js')}}"></script>
+{% endblock body %}

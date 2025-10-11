@@ -1,0 +1,95 @@
+/* Transaction Report Modal Overlay */
+.custom-modal-rport {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 150%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Transaction Report Modal Box */
+.custom-modal-content-rport {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: slideDown 0.3s ease;
+  box-sizing: border-box;
+
+  /* merged from duplicate */
+  max-height: 90vh;
+  /* Constrain height */
+  overflow-y: auto;
+  /* Allow scroll if content is too long */
+  position: relative;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Animation */
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Close button styling */
+.custom-modal-content-rport .close-trans-report {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.custom-modal-content-rport .close-trans-report:hover {
+  color: #000;
+}
+
+/* Buttons neatly aligned */
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  /* stack on small screens */
+}
+
+
+/* Table update & delete btn icons color*/
+.update-btn {
+  background-color: transparent !important;
+  border: none;
+  color: #eba613 !important;
+  cursor: pointer;
+}
+
+.update-btn i {
+  color: #04d939;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
+
+.delete-btn i {
+  color: red;
+}
+/* End Table update & delete btn icons color*/

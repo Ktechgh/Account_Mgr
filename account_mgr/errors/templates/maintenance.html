@@ -1,0 +1,26 @@
+
+{% extends "base.html" %} 
+
+{% block head %}
+<title>{% block title %}503 Service Unavailable{% endblock title %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/503.css')}}" />
+{% endblock head %}
+
+{% block body %} 
+{% block content %}
+<div class="container">
+  <div class="gear-icon">
+    <div class="gear"></div>
+  </div>
+  <h1>503</h1>
+  <h2>Service Unavailable</h2>
+  <p>
+    Our service is temporarily unavailable. We're working on it and will be back
+    soon!
+  </p>
+  <button id="main-reload-btn">Try Again</button>
+</div>
+
+{% endblock content %}
+<script src="{{ url_for('static', filename='js/maintainance.js')}}"></script>
+{% endblock body %}

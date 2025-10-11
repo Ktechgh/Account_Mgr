@@ -1,0 +1,22 @@
+{% extends "base.html" %} 
+
+{% block head %}
+<title>{% block title %}Bad Request{% endblock title %}</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/400.css')}}" />
+{% endblock head %} 
+
+{% block body %} 
+{% block content %}
+<div class="container">
+  <div class="glitch" id="glitch-text">
+    <h1>400</h1>
+    <h2>Bad Request</h2>
+    <p>Sorry, your request couldn't be processed.</p>
+    <button id="go-back-btn">Go Back</button>
+  </div>
+</div>
+
+{% endblock content %}
+<script src="{{ url_for('static', filename='js/error_pages_all.js')}}"></script>
+{% endblock body %}

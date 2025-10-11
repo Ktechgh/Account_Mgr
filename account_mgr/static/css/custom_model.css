@@ -1,0 +1,220 @@
+h2 {
+  text-align: center;
+  text-decoration: underline;
+}
+
+.custom-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.add-btn {
+  background: green;
+  color: white;
+  border: none;
+  font-size: 20px;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+}
+
+.custom-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  padding-top: 50px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.custom-modal-content {
+  background: #fff;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+}
+
+@media (max-width: 768px) {
+  .custom-modal-content {
+    width: 95%;
+    max-width: 95%;
+  }
+}
+
+.close-modal {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.section-card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cash-to-bank {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  /* allow wrapping on smaller screens */
+}
+
+.cash-to-bank label {
+  margin: 0;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.cash-to-bank .cash-input,
+#cash_to_bank {
+  width: 150px;
+  max-width: 150px;
+  display: inline-block;
+  text-align: right;
+}
+
+.cash-to-bank .btn {
+  margin-left: 10px;
+}
+
+/* 📱 Mobile view fix */
+@media (max-width: 576px) {
+  .cash-to-bank {
+    justify-content: flex-start;
+    /* align left on mobile */
+    flex-direction: column;
+    /* stack vertically */
+    align-items: flex-start;
+  }
+
+  .cash-to-bank label {
+    margin-bottom: 5px;
+  }
+
+  .cash-to-bank .cash-input,
+  #cash_to_bank {
+    width: 100%;
+    /* full width on mobile */
+    max-width: 100%;
+  }
+
+  .cash-to-bank .btn {
+    margin-left: 0;
+    width: 100%;
+    /* make button full width on mobile */
+  }
+}
+
+.light-green {
+  background-color: #8cffa748 !important;
+}
+
+/* =========== */
+
+.step {
+  display: none;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.step.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progressbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  counter-reset: step;
+  padding-left: 0;
+}
+
+.progressbar li {
+  list-style: none;
+  text-align: center;
+  width: 100%;
+  position: relative;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.progressbar li:before {
+  counter-increment: step;
+  content: counter(step);
+  width: 32px;
+  height: 32px;
+  border: 2px solid #adb5bd;
+  display: block;
+  text-align: center;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background-color: white;
+  line-height: 28px;
+  font-weight: bold;
+}
+
+.progressbar li:after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: #adb5bd;
+  top: 15px;
+  left: -50%;
+  z-index: -1;
+}
+
+.progressbar li:first-child:after {
+  content: none;
+}
+
+.progressbar li.active {
+  color: #0d6efd;
+}
+
+.progressbar li.active:before {
+  border-color: #0d6efd;
+}
+
+.progressbar li.active + li:after {
+  background: #0d6efd;
+}
+
+/* Override Bootstrap modal max-width */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .modal-dialog.modal-lg {
+    max-width: 95% !important;
+    /* expand modal wider on tablets */
+    margin: 0 auto;
+    margin-top: 20px;
+  }
+}
+

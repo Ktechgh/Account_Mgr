@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block content_header %}
+{% endblock content_header %}
+
+{% block table_container %}
+
+{% block custom_header %}
+<div class="custom-card-header">
+  <h3>Add New CSA</h3>
+  <button class="add-btn" id="openModalBtn_s1s2">+</button>
+</div>
+{% endblock custom_header %}
+
+<div class="container mt-4 section-card">
+  <div class="mt-4">
+    <table class="table table-bordered table-striped section-card">
+      <thead class="table-dark">
+        <tr>
+          <th class="text-white">ID</th>
+          <th class="text-white">CSA Name</th>
+          <th class="text-white">Edit/Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for att in attendants %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ att.attendant_name }}</td>
+          <td class="text-center">
+            <!-- Edit -->
+            <a href="{{ url_for('attendants_registration.update_attendant', attendant_id=att.id) }}"
+              class="btn btn-sm btn-warning update-btn">
+              <i class="fas fa-edit"></i> |
+            </a>
+
+            <!-- Delete (triggers modal) -->
+            <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+              data-delete-url="{{ url_for('attendants_registration.delete_attendant', attendant_id=att.id) }}"
+              data-attendant-name="{{ att.attendant_name }}">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" class="text-center">No attendants added yet</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade mb-4" id="confirmDeleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteModalMessage">Are you sure you want to delete this CSA?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" href="#" class="btn btn-danger">Yes, Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: Add CSA -->
+<div class="modal fade" id="stepperModal" tabindex="-1">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h3 class="modal-title">New CSAs</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST">
+        {{ csa_form.hidden_tag() }}
+        <div class="modal-body">
+          <div class="mb-3">
+            {{ csa_form.attendant_name(class="form-control") }}
+            {% for error in csa_form.attendant_name.errors %}
+            <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          {{ csa_form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock table_container %}

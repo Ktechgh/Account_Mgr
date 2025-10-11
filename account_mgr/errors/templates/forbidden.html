@@ -1,0 +1,25 @@
+
+{% extends "base.html" %} 
+
+{% block head %}
+<title>{% block title %}Forbidden{% endblock title %}</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/403.css')}}" />
+{% endblock head %} 
+
+{% block body %} 
+{% block content %}
+<div class="container">
+  <div class="stop-icon">
+    <div class="stop-sign">
+      <span>403</span>
+    </div>
+  </div>
+  <h2>Forbidden</h2>
+  <p>You don't have permission to execute this operation.</p>
+  <button id="go-back-btn">Go Back</button>
+</div>
+
+{% endblock content %}
+<script src="{{ url_for('static', filename='js/error_pages_all.js')}}"></script>
+{% endblock body %}

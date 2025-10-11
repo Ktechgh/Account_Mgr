@@ -1,0 +1,24 @@
+
+{% extends "base.html" %} 
+
+{% block head %}
+<title>{% block title %}Internal Server Error{% endblock title %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/500.css')}}" />
+{% endblock head %} 
+
+{% block body %}
+{% block content %}
+<div class="container">
+  <div class="glitch-error">
+    <h1>500</h1>
+    <h2>Internal Server Error</h2>
+    <p>Something went wrong on our end. Please try again later.</p>
+    <button id="server_refresh-btn">Retry</button>
+  </div>
+  <div class="glitch-background"></div>
+</div>
+
+{% endblock content %}
+<script src="{{ url_for('static', filename='js/error_pages_all.js')}}"></script>
+{% endblock body %}
+

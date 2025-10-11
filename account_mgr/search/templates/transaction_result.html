@@ -1,0 +1,460 @@
+{% extends "layout.html" %} 
+
+
+{% macro display_val(value) %}
+{{ value if value is not none else "-" }}
+{% endmacro %}
+
+
+{% block content_header %}
+<div class="summary-table-top mb-4">
+  <div class="content-header-y mt-3">
+    <div>
+      <h1>{{ report_title }}</h1>
+    </div>
+  </div>
+</div>
+{% endblock content_header %} 
+
+{% block table_container %} 
+{# --- Closing Session Table --- #}
+{% if report_type == ReportType.CLOSING_SESSION.value or report_type == ReportType.ALL.value %}
+<div class="table-container overflow-auto">
+  <h5 class="mb-3 text-danger">Closing Session Report</h5>
+  <table class="table table-striped table-bordered overflow-auto">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Section</th>
+        <th scope="col">Admin Username</th>
+        <th scope="col">Date Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set closing_results = results if report_type != ReportType.ALL.value else
+      results[ReportType.CLOSING_SESSION.value] %}
+      {% if closing_results %}
+      {% for session in closing_results %}
+      <tr>
+        <td>{{ session.id }}</td>
+        <td>{{ session.section }}</td>
+        <td>{{ session.admin_user_name or "N/A" }}</td>
+        <td>{{ session.date_created.strftime('%d-%m-%Y %I:%M %p') }}</td>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <tr>
+        <td colspan="4" class="text-center text-muted">No closing session data found.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+
+{# --- Meter Reading Table --- #}
+{% if report_type == ReportType.METER_READING.value or report_type == ReportType.ALL.value %}
+<div class="table-container overflow-auto mt-2">
+  <h5 class="mb-3 text-danger">Meter Reading Report S1-S4</h5>
+  <table class="table table-striped table-bordered overflow-auto">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Session/Shift ID</th>
+        <th scope="col">Super 1 Opening</th>
+        <th scope="col">Super 2 Opening</th>
+        <th scope="col">Super 1 Closing</th>
+        <th scope="col">Super 2 Closing</th>
+        <th scope="col">Liters Sold</th>
+        <th scope="col">RTT</th>
+        <th scope="col">Price</th>
+        <th scope="col">Total</th>
+        <th scope="col">CSA Name</th>
+        <th scope="col">Date of Sale</th>
+        <th scope="col">Date Created</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set meter_results = results if report_type != ReportType.ALL.value else results[ReportType.METER_READING.value]
+      %}
+      {% if meter_results %}
+      {% for reading in meter_results %}
+      <tr>
+        <td>{{ reading.id }}</td>
+        <td class="text-danger">{{ reading.session_id }}</td>
+        <td>{{ reading.super_1_opening }}</td>
+        <td>{{ reading.super_2_opening }}</td>
+        <td>{{ reading.super_1_closing }}</td>
+        <td>{{ reading.super_2_closing }}</td>
+        <td class="text-success fw-bold">{{ reading.liters_sold }}</td>
+        <td>{{ reading.gsa_test_draw or "N/A" }}</td>
+        <td>{{ reading.price }}</td>
+        <td class="text-success fw-bold">{{ reading.total }}</td>
+        <td class="text-danger fw-bold">{{ reading.csa_name }}</td>
+        <td>{{ reading.date_of_sale.strftime('%d-%m-%Y') }}</td>
+        <td>{{ reading.date_created.strftime('%d-%m-%Y %I:%M %p') }}</td>
+        <td class="text-center">
+          <!-- Delete (triggers modal) -->
+          <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+            data-delete-url="{{ url_for('transactions_bp.delete_meter_reading', reading_id=reading.id) }}"
+            data-reading-id="{{ reading.id }}">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+
+      </tr>
+      {% endfor %}
+      {% else %}
+      <tr>
+        <td colspan="14" class="text-center text-muted">No meter reading data found.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteModalMessage">Are you sure you want to delete this meter reading?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmDeleteBtn" href="#" class="btn btn-danger">Yes, Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{# --- Diesel Reading Table (D1-D4) --- #}
+{% if report_type == ReportType.D14_READING.value or report_type == ReportType.ALL.value %}
+<div class="table-container overflow-auto mt-2">
+  <h5 class="mb-3 text-danger">Meter Reading Report (D1-D4)</h5>
+  <table class="table table-striped table-bordered overflow-auto">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Session/Shift ID</th>
+        <th scope="col">Section</th>
+        <th scope="col">D1 Opening</th>
+        <th scope="col">D1 Closing</th>
+        <th scope="col">D2 Opening</th>
+        <th scope="col">D2 Closing</th>
+        <th scope="col">D3 Opening</th>
+        <th scope="col">D3 Closing</th>
+        <th scope="col">D4 Opening</th>
+        <th scope="col">D4 Closing</th>
+        <th scope="col">RTT (Liters)</th>
+        <th scope="col">Liters Sold</th>
+        <th scope="col">Price</th>
+        <th scope="col">Total</th>
+        <th scope="col">CSA Name</th>
+        <th scope="col">Date of Sale</th>
+        <th scope="col">Date Created</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set d14_results = results if report_type != ReportType.ALL.value else results[ReportType.D14_READING.value] %}
+      {% if d14_results %}
+      {% for reading in d14_results %}
+      <tr>
+        <td>{{ reading.id }}</td>
+        <td class="text-danger">{{ reading.session_id }}</td>
+        <td>{{ reading.section }}</td>
+        <td>{{ reading.d1_opening }}</td>
+        <td>{{ reading.d1_closing }}</td>
+        <td>{{ reading.d2_opening }}</td>
+        <td>{{ reading.d2_closing }}</td>
+        <td>{{ reading.d3_opening }}</td>
+        <td>{{ reading.d3_closing }}</td>
+        <td>{{ reading.d4_opening }}</td>
+        <td>{{ reading.d4_closing }}</td>
+        <td>{{ reading.rtt_liters or "N/A" }}</td>
+        <td class="text-success fw-bold">{{ reading.liters_sold }}</td>
+        <td>{{ reading.price }}</td>
+        <td class="text-success fw-bold">{{ reading.total }}</td>
+        <td class="text-danger fw-bold">{{ reading.csa_name }}</td>
+        <td>{{ reading.date_of_sale.strftime('%d-%m-%Y') }}</td>
+        <td>{{ reading.date_created.strftime('%d-%m-%Y %I:%M %p') }}</td>
+        <td class="text-center">
+          <!-- Delete (triggers modal) -->
+          <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+            data-delete-url="{{ url_for('transactions_bp.delete_d14_reading', reading_id=reading.id) }}"
+            data-reading-id="{{ reading.id }}">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <tr>
+        <td colspan="19" class="text-center text-muted">No diesel (D1-D4) reading data found.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+
+{# --- CREDIT TRANSACTIONS REPORT --- #}
+{% if report_type == ReportType.CREDIT.value or report_type == ReportType.ALL.value %}
+<div class="table-container overflow-auto mt-2">
+  <h5 class="mb-3 text-danger">Credit / E-Transactions Report</h5>
+  <table class="table table-striped table-bordered overflow-auto">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Session/Shift ID</th>
+        <th scope="col">GCB</th>
+        <th scope="col">MoMo</th>
+        <th scope="col">Tingg</th>
+        <th scope="col">Zenith</th>
+        <th scope="col">Republic</th>
+        <th scope="col">Prudential</th>
+        <th scope="col">ADB</th>
+        <th scope="col">Stanbic</th>
+        <th scope="col">Ecobank</th>
+        <th scope="col">Fidelity</th>
+        <th scope="col">Credit AB</th>
+        <th scope="col">Credit CF</th>
+        <th scope="col">Credit ZM</th>
+        <th scope="col">Credit WL</th>
+        <th scope="col">Credit ZL</th>
+        <th scope="col">Water Bill</th>
+        <th scope="col">ECG Bill</th>
+        <th scope="col">Genset</th>
+        <th scope="col">Approved Miscellaneous</th>
+        <th scope="col">Soc Staff Credit</th>
+        <th scope="col">Collection AB</th>
+        <th scope="col">Collection WL</th>
+        <th scope="col">Collection ZL</th>
+        <th scope="col">Collection GC</th>
+        <th scope="col">Collection CV</th>
+        <th scope="col">Lube (1L)</th>
+        <th scope="col">Lube Drum</th>
+        <th scope="col">Duster Collection</th>
+        <th scope="col">Total Collections</th>
+        <th scope="col">Total Credit/E-Cash</th>
+        <th scope="col">Cash to Bank</th>
+        <th scope="col">Grand Total</th>
+        <th scope="col">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set credit_results = results if report_type != ReportType.ALL.value else results[ReportType.CREDIT.value] %}
+      {% if credit_results %}
+
+      {# --- Use namespace for totals --- #}
+      {% set ns = namespace(
+      total_gcb=0,
+      total_momo=0,
+      total_tingg=0,
+      total_zenith=0,
+      total_republic=0,
+      total_prudential=0,
+      total_adb=0,
+      total_stanbic=0,
+      total_ecobank=0,
+      total_fidelity=0,
+      total_water_bill=0,
+      total_ecg_bill=0,
+      total_genset=0,
+      total_approve_miscellaneous=0
+      ) %}
+
+      {% for c in credit_results %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td class="text-danger">{{ c.session_id }}</td>
+        <td>{{ display_val(c.gcb) }}</td>
+        <td>{{ display_val(c.momo) }}</td>
+        <td>{{ display_val(c.tingg) }}</td>
+        <td>{{ display_val(c.zenith) }}</td>
+        <td>{{ display_val(c.republic) }}</td>
+        <td>{{ display_val(c.prudential) }}</td>
+        <td>{{ display_val(c.adb) }}</td>
+        <td>{{ display_val(c.stanbic) }}</td>
+        <td>{{ display_val(c.ecobank) }}</td>
+        <td>{{ display_val(c.fidelity) }}</td>
+        <td>{{ display_val(c.credit_ab) }}</td>
+        <td>{{ display_val(c.credit_cf) }}</td>
+        <td>{{ display_val(c.credit_gc) }}</td>
+        <td>{{ display_val(c.credit_wl) }}</td>
+        <td>{{ display_val(c.credit_zl) }}</td>
+        <td>{{ display_val(c.water_bill) }}</td>
+        <td>{{ display_val(c.ecg_bill) }}</td>
+        <td>{{ display_val(c.genset) }}</td>
+        <td>{{ display_val(c.approve_miscellaneous) }}</td>
+        <td>{{ display_val(c.soc_staff_credit) }}</td>
+        <td>{{ display_val(c.collection_ab) }}</td>
+        <td>{{ display_val(c.collection_wl) }}</td>
+        <td>{{ display_val(c.collection_zl) }}</td>
+        <td>{{ display_val(c.collection_gc) }}</td>
+        <td>{{ display_val(c.collection_cv) }}</td>
+        <td>{{ display_val(c.lube_1_liter) }}</td>
+        <td>{{ display_val(c.lube_drum) }}</td>
+        <td>{{ display_val(c.duster_collection) }}</td>
+        <td class="text-danger fw-bold">{{ c.total_collection }}</td>
+        <td class="text-danger fw-bold">{{ c.total_credit }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(c.cash_to_bank) }}</td>
+        <td class="text-danger fw-bold">{{ c.grand_total }}</td>
+        <td>{{ c.date_created.strftime('%d-%m-%Y') }}</td>
+      </tr>
+
+      {# --- Add to totals --- #}
+      {% set ns.total_gcb = ns.total_gcb + (c.gcb or 0) %}
+      {% set ns.total_momo = ns.total_momo + (c.momo or 0) %}
+      {% set ns.total_tingg = ns.total_tingg + (c.tingg or 0) %}
+      {% set ns.total_zenith = ns.total_zenith + (c.zenith or 0) %}
+      {% set ns.total_republic = ns.total_republic + (c.republic or 0) %}
+      {% set ns.total_prudential = ns.total_prudential + (c.prudential or 0) %}
+      {% set ns.total_adb = ns.total_adb + (c.adb or 0) %}
+      {% set ns.total_stanbic = ns.total_stanbic + (c.stanbic or 0) %}
+      {% set ns.total_ecobank = ns.total_ecobank + (c.ecobank or 0) %}
+      {% set ns.total_fidelity = ns.total_fidelity + (c.fidelity or 0) %}
+      {% set ns.total_water_bill = ns.total_water_bill + (c.water_bill or 0) %}
+      {% set ns.total_ecg_bill = ns.total_ecg_bill + (c.ecg_bill or 0) %}
+      {% set ns.total_genset = ns.total_genset + (c.genset or 0) %}
+      {% set ns.total_approve_miscellaneous = ns.total_approve_miscellaneous + (c.approve_miscellaneous or 0) %}
+      {% endfor %}
+
+      {# --- Totals row --- #}
+      <tr class="fw-bold table-warning">
+        <td colspan="2" class="text-center text-black fw-bold">TOTALS</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_gcb) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_momo) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_tingg) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_zenith) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_republic) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_prudential) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_adb) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_stanbic) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_ecobank) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_fidelity) }}</td>
+        <td colspan="5"></td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_water_bill) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_ecg_bill) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_genset) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_approve_miscellaneous) }}</td>
+        <td colspan="14"></td>
+      </tr>
+
+      {% else %}
+      <tr>
+        <td colspan="35" class="text-center text-muted">No credit transaction data found.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+
+
+{# --- PAPER TRANSACTIONS REPORT --- #}
+{% if report_type == ReportType.PAPER.value or report_type == ReportType.ALL.value %}
+<div class="table-container overflow-auto mt-2">
+  <h5 class="mb-3 text-danger">Paper - Cash Report</h5>
+  <table class="table table-striped table-bordered overflow-auto">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">₵200</th>
+        <th scope="col">₵100</th>
+        <th scope="col">₵50</th>
+        <th scope="col">₵20</th>
+        <th scope="col">₵10</th>
+        <th scope="col">₵5</th>
+        <th scope="col">₵2</th>
+        <th scope="col">₵1</th>
+        <th scope="col">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set paper_results = results if report_type != ReportType.ALL.value else
+      results[ReportType.PAPER.value] %}
+      {% if paper_results %}
+      {% for p in paper_results %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>{{ display_val(p.note_200) }}</td>
+        <td>{{ display_val(p.note_100) }}</td>
+        <td>{{ display_val(p.note_50) }}</td>
+        <td>{{ display_val(p.note_20) }}</td>
+        <td>{{ display_val(p.note_10) }}</td>
+        <td>{{ display_val(p.note_5) }}</td>
+        <td>{{ display_val(p.note_2) }}</td>
+        <td>{{ display_val(p.note_1) }}</td>
+        <td>{{ p.date_created.strftime('%d-%m-%Y') }}</td>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <tr>
+        <td colspan="10" class="text-center text-muted">No paper transaction data found.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+
+{# --- COINS TRANSACTIONS REPORT --- #}
+{% if report_type == ReportType.COINS.value or report_type == ReportType.ALL.value %}
+<div class="table-container overflow-auto mt-2">
+  <h5 class="mb-3 text-danger">Coins Report</h5>
+  <table class="table table-striped table-bordered overflow-auto">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">₵2 coin</th>
+        <th scope="col">₵1 coin</th>
+        <th scope="col">50 ps</th>
+        <th scope="col">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set coins_results = results if report_type != ReportType.ALL.value else
+      results[ReportType.COINS.value] %}
+      {% if coins_results %}
+      {% for co in coins_results %}
+      <tr>
+        <td>{{ co.id }}</td>
+        <td>{{ display_val(co.coin_5) }}</td>
+        <td>{{ display_val(co.coin_2) }}</td>
+        <td>{{ display_val(co.coin_1) }}</td>
+        <td>{{ co.date_created.strftime('%d-%m-%Y') }}</td>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-center text-muted">No coins transaction data found.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+<div class="custom-card-header mt-1">
+  <h5>Export Transactions</h5>
+  <a href="{{ url_for('transactions_bp.export_transaction_report',
+                        start_date=form.start_date.data,
+                        end_date=form.end_date.data,
+                        report_type=form.report_type.data) }}" class="btn btn-success btn-sm">
+    <i class="fas fa-file-excel"></i> Export
+  </a>
+</div>
+{% endblock table_container %} 

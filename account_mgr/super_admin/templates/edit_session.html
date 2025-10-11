@@ -1,0 +1,268 @@
+{% extends "layout.html" %}
+
+{% macro render_field(field, placeholder="", extra={}) %}
+{{ field(class="form-control",
+value=(field.data if field.data not in [None, 0, "0.00"] else ""),
+placeholder=placeholder,**extra) }}
+{% endmacro %}
+
+
+{% block content_header %}
+{% endblock content_header %}
+
+{% block table_container %}
+
+{% block custom_header %}
+<div class="custom-card-header">
+  <h3>Edit Session</h3>
+  <!-- <button class="add-btn" id="openModalBtn_s1s2">+</button> -->
+</div>
+{% endblock custom_header %}
+
+<div class="container mt-4 section-card">
+  <form method="POST">
+    {{ credit_form.hidden_tag() }}
+    {{ paper_form.hidden_tag() }}
+    {{ coins_form.hidden_tag() }}
+
+    <div class="section-card mt-3">
+      <div class="table-responsive">
+        <table id="table_s1s2" class="table table-bordered">
+          <thead>
+            <tr>
+              <div class="mb-3 d-flex align-items-center justify-content-between mt-1">
+                <!-- Meter Table Dropdown (disabled in edit) -->
+                <div class="d-flex align-items-center">
+                  {{ section_form.section.label(class="fw-bold text-primary me-2") }}
+                  {{ section_form.section(class="form-select w-auto", id="section", disabled=True) }}
+                </div>
+              </div>
+            </tr>
+            <input type="hidden" name="selected_section" id="selected_section"
+              value="{{ section_form.section.data }}" />
+
+            <tr>
+              <th class="text-danger">Transactions (Electronic & Credit)</th>
+              <th class="text-danger">Cash - Paper Denominations</th>
+              <th class="text-danger">Cash - Coins Denominations</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>{{ render_field(credit_form.gcb, "GCB", {"id": "gcb"}) }}</td>
+              <td>{{ render_field(paper_form.note_200, "₵200 notes", {"id": "note_200", "data-denom": 200}) }}</td>
+              <td>{{ render_field(coins_form.coin_2, "₵2 coin", {"id": "coin_2", "data-denom": 2}) }}</td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.momo, "MoMo", {"id": "momo"}) }}</td>
+              <td>{{ render_field(paper_form.note_100, "₵100 notes", {"id": "note_100", "data-denom": 100}) }}</td>
+              <td>{{ render_field(coins_form.coin_1, "₵1 coin", {"id": "coin_1", "data-denom": 1}) }}</td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.tingg, "Tingg", {"id": "tingg"}) }}</td>
+              <td>{{ render_field(paper_form.note_50, "₵50 notes", {"id": "note_50", "data-denom": 50}) }}</td>
+              <td>{{ render_field(coins_form.coin_5, "₵0.50 coin", {"id": "coin_5", "data-denom": 0.5}) }}</td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.zenith, "Zenith", {"id": "zenith"}) }}</td>
+              <td>{{ render_field(paper_form.note_20, "₵20 notes", {"id": "note_20", "data-denom": 20}) }}</td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td>{{ render_field(credit_form.republic, "Republic", {"id": "republic"}) }}</td>
+              <td>{{ render_field(paper_form.note_10, "₵10 notes", {"id": "note_10", 'data-denom': 10} )}}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.prudential, "Prudential", {"id": "prudential"}) }}</td>
+              <td>{{ render_field(paper_form.note_5, "₵5 notes", {"id": "note_5", 'data-denom': 5} )}}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.adb, "ADB", {"id": "adb"}) }}</td>
+              <td>{{ render_field(paper_form.note_2, "₵2 notes", {"id": "note_2", 'data-denom': 2} )}}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.stanbic, "Stanbic", {"id": "stanbic"}) }}</td>
+              <td>{{ render_field(paper_form.note_1, "₵1 notes", {"id": "note_1", 'data-denom': 1} ) }}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.ecobank, "Ecobank", {"id": "ecobank"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.fidelity, "Fidelity", {"id": "fidelity"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+
+
+
+
+            <tr>
+              <td>{{ render_field(credit_form.credit_ab, "Credit Sale (Mr Ablor)", {"id": "credit_ab"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.credit_cf, "Credit Sale (Cassava Farm)", {"id": "credit_cf"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.credit_wl, "Credit Sale (Williago)", {"id": "credit_wl"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.credit_zl, "Credit Sale (Zoomlion)", {"id": "credit_zl"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.credit_gc, "Credit Sale (Gadco)", {"id": "credit_gc"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.soc_staff_credit, "Soc Staff Credit", {"id": "soc_staff_credit"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.water_bill, "Water Bill", {"id": "water_bill"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.ecg_bill, "ECG Bill", {"id": "ecg_bill"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.genset, "Genset", {"id": "genset"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.approve_miscellaneous, "Approve Miscellaneous", {"id": "approve_miscellaneous"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <td colspan="4" class="text-bg-secondary">
+              <i class="fa fa-arrow-up"></i> Credits |
+              <i class="fa fa-arrow-down"></i> Collections
+            </td>
+            <tr>
+              <td>{{ render_field(credit_form.collection_wl, "Collection (Williago)", {"id": "collection_wl"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.collection_zl, "Collection (Zoomlion)", {"id": "collection_zl"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.collection_gc, "Collection (Gadco)", {"id": "collection_gc"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.collection_ab, "Collection (Ablor)", {"id": "collection_ab"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.collection_cv, "Collection (Cassava Farm)", {"id": "collection_cv"}) }}
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.lube_1_liter, "Lube (1L)", {"id": "lube_1_liter"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.lube_drum, "Drum Lube", {"id": "lube_drum"}) }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{ render_field(credit_form.duster_collection, "Duster Collection", {"id": "duster_collection"}) }}
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+
+            <!-- Totals -->
+            <tr>
+              <td class="text-danger fw-semibold">Total Trans (Electronic & Credit)</td>
+              <td>{{ credit_form.total_credit(id="total_credit", class="form-control light-green") }}</td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td class="text-danger fw-semibold">Total Credit Sales Collection</td>
+              <td>{{ credit_form.total_collection(id="total_collection", class="form-control light-green") }}</td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td class="text-success fw-semibold">Grand Total Sales (Liters x Price)</td>
+              <td>{{ credit_form.grand_total(id="grand_total", class="form-control light-green") }}</td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td class="text-danger fw-semibold">Paper & Coins Denomination Column</td>
+              <td>{{ credit_form.paper_total(id="paper_total") }}</td>
+              <td>{{ credit_form.coin_total(id="coin_total") }}</td>
+            </tr>
+
+            <tr>
+              <td class="text-black fw-semibold">Total Physical Cash</td>
+              <td colspan="1">{{ credit_form.total_physical_cash(id="total_physical_cash") }}</td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td class="text-success fw-semibold">Denomination Status</td>
+              <td colspan="2" class="d-flex align-items-center gap-2">
+                {{ credit_form.cash_balance_status(id="cash_balance_status") }}
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+
+          <!-- FOOTER ROW -->
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-center text-bg-light">
+                <div class="d-flex justify-content-end gap-3">
+                  <button type="submit" name="submit_denomination" class="btn btn-primary btn-sm">
+                    Save Denomination
+                  </button>
+                  {{ credit_form.submit_credit(class="btn btn-primary px-4") }}
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="cash-to-bank">
+        <label for="cash_to_bank">Cash to bank:</label>
+        {{ credit_form.cash_to_bank(id="cash_to_bank", class="form-control light-green cash-input", readonly=True) }}
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock table_container %}

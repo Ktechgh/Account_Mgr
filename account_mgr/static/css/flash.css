@@ -1,0 +1,44 @@
+/* CSS Animation for sliding-in the flash message */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* CSS Animation for fading-out the flash message */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Styling for the flash message container */
+.flash--message {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  z-index: 9999;
+  height: auto;
+  line-height: 28px;
+}
+
+/* Styling for each flash message */
+.alert {
+  animation: slideIn 0.3s forwards, fadeOut 0.3s 4s forwards;
+  margin-bottom: 5px;
+  padding: 5px 10px;
+}
+
+.fas.fa-circle-check {
+  color: green;
+}
+
+.fas.fa-circle-xmark {
+  color: #e3371e;
+}

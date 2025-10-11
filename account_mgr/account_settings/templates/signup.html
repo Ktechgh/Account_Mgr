@@ -1,0 +1,56 @@
+{% extends "update_account.html" %}
+
+<title>{% block title %}Create Account{% endblock title %}</title>
+
+{% block user_profile %} 
+{% endblock user_profile %}
+
+{% block password %} 
+{% endblock password %}
+
+{% block forgot_password %} 
+{% endblock forgot_password %}
+
+{% block account %}
+<li class="nav-item">
+  <a class="nav-link" id="createLink">Create Account</a>
+</li>
+{% endblock account %}
+
+{% block form %}
+<div id="create" class="form-container">
+  <h4 class="text-danger">Create New User</h4>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.username(class="form-control mb-3")}}
+    </div>
+
+    <div class="mb-3">
+      {{ form.staff_id(class="form-control mb-3")}}
+    </div>
+
+    <div class="mb-3">
+      {{ form.tenant_id(class="form-control mb-3")}}
+    </div>
+
+    <div class="mb-3">
+      {{ form.email(class="form-control mb-3")}}
+    </div>
+
+    <div class="mb-3">
+      {{ form.password(class="form-control mb-3")}}
+    </div>
+
+    <div class="mb-3">
+      {{ form.confirm_password(class="form-control mb-3")}}
+    </div>
+
+    <div class="mb-3">
+      {{ form.user_role(class="form-control mb-3")}}
+    </div>
+
+    <button type="submit" class="btn btn-success">Create User</button>
+  </form>
+</div>
+{% endblock form %}
