@@ -23,8 +23,9 @@ git remote -v → Displays the current remote repository URL(s) linked to your l
 
 These commands set who you are globally (applies to all repos).
 
-git config --global user.email "kennarttechnologies@gmail.com"
-git config --global user.name "Kennarttechl"
+
+git config --global user.email "techk657@gmail.com"
+git config --global user.name "Ktechgh"
 
 
 
