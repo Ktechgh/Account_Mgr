@@ -34,11 +34,8 @@ DATABASE_PATH = os.path.join(APP_DATABASE, "account_mgr_db.db")
 
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    os.getenv("DATABASE_URL")  # Try local first
-    # or os.getenv("DATABASE_URL")  # Then production
-    # or f"sqlite:///{DATABASE_PATH}"  # Fallback
+    "postgresql://account_mgr_user:5BvE1k2IJH8aiEIrEASTL3MliCuNPCdC@dpg-d3see715pdvs73e3p8h0-a/account_mgr"
 )
-
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["BABEL_DEFAULT_LOCALE"] = "en_US"
