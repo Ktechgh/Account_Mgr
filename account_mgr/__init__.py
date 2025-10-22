@@ -12,7 +12,7 @@ from flask_session import Session
 from .ansi_ import get_color_support
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate, upgrade
+from flask_migrate import Migrate
 from flask_limiter.util import get_remote_address
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import login_manager, LoginManager, current_user
@@ -327,16 +327,16 @@ app.register_blueprint(super_admin_secure, url_prefix="/")
 app.register_blueprint(attendants_registration, url_prefix="/")
 
 
-from flask import current_app
+# from flask import current_app
 
 
-@app.before_request
-def apply_database_migrations():
-    """Run Alembic migrations automatically (only in development)."""
-    if current_app.config.get("ENV") == "development":
-        try:
-            upgrade()
-            print("✅ Database migrations applied successfully.")
-        except Exception as e:
-            app.logger.exception("Database migration failed: %s", e)
-            print(f"⚠️ Database migration skipped or failed: {e}")
+# @app.before_request
+# def apply_database_migrations():
+#     """Run Alembic migrations automatically (only in development)."""
+#     if current_app.config.get("ENV") == "development":
+#         try:
+#             upgrade()
+#             print("✅ Database migrations applied successfully.")
+#         except Exception as e:
+#             app.logger.exception("Database migration failed: %s", e)
+#             print(f"⚠️ Database migration skipped or failed: {e}")
