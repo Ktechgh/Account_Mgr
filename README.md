@@ -28,7 +28,6 @@ git config --global user.email "techk657@gmail.com"
 git config --global user.name "Ktechgh"
 
 
-
 # 🧠 Explanation:
 This sets your Git commit signature — each commit you make will show up under this name and email.
 If you ever commit under a wrong email, you can fix it with the same commands.
