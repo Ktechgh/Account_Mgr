@@ -74,45 +74,6 @@ class User(db.Model, UserMixin):
             return None
         return User.query.get(user_id)
 
-    # class ClosingSession(db.Model):
-    #     __tablename__ = "closing_sessions"
-
-    #     id = db.Column(db.Integer, primary_key=True)
-    #     section = db.Column(db.String(10), nullable=False)
-
-    #     # Link to user/manager
-    #     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    #     user = db.relationship("User", backref="closing_sessions", lazy=True)
-
-    #     admin_user_name = db.Column(db.String(100), nullable=True)
-    #     session_date = db.Column(db.Date, nullable=False, default=date.today, index=True)
-
-    #     # Relationships with cascade delete
-    #     credit_transactions = db.relationship(
-    #         "CreditTransaction", backref="session", lazy=True, cascade="all, delete-orphan"
-    #     )
-    #     paper_transactions = db.relationship(
-    #         "PaperTransaction", backref="session", lazy=True, cascade="all, delete-orphan"
-    #     )
-    #     coin_transactions = db.relationship(
-    #         "CoinsTransaction", backref="session", lazy=True, cascade="all, delete-orphan"
-    #     )
-    #     meter_readings = db.relationship(
-    #         "MeterReading", backref="session", lazy=True, cascade="all, delete-orphan"
-    #     )
-    #     d14_readings = db.relationship(
-    #         "D14Reading", backref="session", lazy=True, cascade="all, delete-orphan"
-    #     )
-
-    #     date_created = db.Column(
-    #         DateTime(timezone=True), server_default=func.now(), nullable=False
-    #     )
-
-    # def __repr__(self):
-    #     return f"<ClosingSession {self.section} - {self.session_date} - User {self.user_id}>"
-
-    #: The ClosingSession model was modified to link to the User model via user_id.
-
 
 class ClosingSession(db.Model):
     """Model for storing closing session information."""
@@ -120,7 +81,7 @@ class ClosingSession(db.Model):
     __tablename__ = "closing_sessions"
 
     id = db.Column(db.Integer, primary_key=True)
-    section = db.Column(db.String(10), nullable=False)
+    section = db.Column(db.String(100), nullable=False)
     admin_user_name = db.Column(db.String(100), nullable=True)
 
     # New explicit session_date column
@@ -193,7 +154,7 @@ class D14Reading(db.Model):
         db.Integer, db.ForeignKey("closing_sessions.id"), nullable=False
     )
 
-    section = db.Column(db.String(10), nullable=False, index=True)
+    section = db.Column(db.String(100), nullable=False, index=True)
 
     d1_opening = db.Column(db.Numeric(12, 2), nullable=False)
     d1_closing = db.Column(db.Numeric(12, 2), nullable=False)
@@ -314,6 +275,7 @@ class PaperTransaction(db.Model):
     date_created = db.Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    is_reconciliation = db.Column(db.Boolean, default=False)
 
 
 # ---------------- COINS ----------------
@@ -336,6 +298,7 @@ class CoinsTransaction(db.Model):
     date_created = db.Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    is_reconciliation = db.Column(db.Boolean, default=False)
 
 
 class CSAName(db.Model):

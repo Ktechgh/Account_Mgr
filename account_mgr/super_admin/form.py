@@ -46,6 +46,7 @@ class SectionForm(FlaskForm):
             ("S3S4", "S3 & S4"),
             ("D1D4", "D1 & D4"),
             ("stock", "Stock"),
+            ("reconciliation", "Reconciliation"),
         ],
         default="",
         validators=[DataRequired(message="⚠️ Please select a meter table.")],
@@ -82,7 +83,7 @@ class Super12Form(FlaskForm):
         label="RTT",
         places=2,
         validators=[Optional()],
-        render_kw={"placeholder": "RTT (Liters)"},
+        render_kw={"placeholder": "RTT"},
     )
     liters_sold = DecimalField(
         places=2,
@@ -144,7 +145,7 @@ class D14Form(FlaskForm):
         label="RTT",
         places=2,
         validators=[Optional()],
-        render_kw={"placeholder": "RTT (Liters)"},
+        render_kw={"placeholder": "RTT"},
     )
     liters_sold = DecimalField(
         places=2,
@@ -355,7 +356,6 @@ class PaperDinominationForm(FlaskForm):
 
 # ---------------- COINS TRANSACTION FORM ----------------
 class CoinsDinominationForm(FlaskForm):
-    # section = HiddenField(label="section")
     coin_5 = IntegerField(
         validators=[Optional()], render_kw={"placeholder": "₵0.50 coin"}
     )

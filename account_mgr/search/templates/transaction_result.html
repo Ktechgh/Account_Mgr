@@ -5,7 +5,6 @@
 {{ value if value is not none else "-" }}
 {% endmacro %}
 
-
 {% block content_header %}
 <div class="summary-table-top mb-4">
   <div class="content-header-y mt-3">
@@ -26,7 +25,7 @@
       <tr>
         <th scope="col">ID</th>
         <th scope="col">Section</th>
-        <th scope="col">Admin Username</th>
+        <th scope="col">Username</th>
         <th scope="col">Date Created</th>
       </tr>
     </thead>
@@ -52,26 +51,26 @@
 </div>
 {% endif %}
 
-
 {# --- Meter Reading Table --- #}
 {% if report_type == ReportType.METER_READING.value or report_type == ReportType.ALL.value %}
 <div class="table-container overflow-auto mt-2">
-  <h5 class="mb-3 text-danger">Meter Reading Report S1-S4</h5>
+  <h5 class="mb-3 text-danger">Meter Reading Report (All Sections)</h5>
   <table class="table table-striped table-bordered overflow-auto">
     <thead>
       <tr>
         <th scope="col">ID</th>
-        <th scope="col">Session/Shift ID</th>
-        <th scope="col">Super 1 Opening</th>
-        <th scope="col">Super 2 Opening</th>
-        <th scope="col">Super 1 Closing</th>
-        <th scope="col">Super 2 Closing</th>
-        <th scope="col">Liters Sold</th>
+        <th scope="col">Section</th>
+        <!-- <th scope="col">Session/Shift ID</th> -->
+        <th scope="col">Opening</th>
+        <th scope="col">Opening</th>
+        <th scope="col">Closing</th>
+        <th scope="col">Closing</th>
+        <th scope="col">Sale Litre</th>
         <th scope="col">RTT</th>
         <th scope="col">Price</th>
         <th scope="col">Total</th>
         <th scope="col">CSA Name</th>
-        <th scope="col">Date of Sale</th>
+        <th scope="col">Sale Date</th>
         <th scope="col">Date Created</th>
         <th scope="col">Actions</th>
       </tr>
@@ -83,11 +82,12 @@
       {% for reading in meter_results %}
       <tr>
         <td>{{ reading.id }}</td>
-        <td class="text-danger">{{ reading.session_id }}</td>
-        <td>{{ reading.super_1_opening }}</td>
-        <td>{{ reading.super_2_opening }}</td>
-        <td>{{ reading.super_1_closing }}</td>
-        <td>{{ reading.super_2_closing }}</td>
+        <td class="fw-bold text-primary">{{ reading.section or "Unknown" }}</td>
+        {# <td class="text-danger">{{ reading.session_id }}</td> #}
+        <td>{{ reading.super_1_opening or reading.super_3_opening or reading.d1_opening }}</td>
+        <td>{{ reading.super_2_opening or reading.super_4_opening or reading.d2_opening }}</td>
+        <td>{{ reading.super_1_closing or reading.super_3_closing or reading.d3_closing }}</td>
+        <td>{{ reading.super_2_closing or reading.super_4_closing or reading.d4_closing }}</td>
         <td class="text-success fw-bold">{{ reading.liters_sold }}</td>
         <td>{{ reading.gsa_test_draw or "N/A" }}</td>
         <td>{{ reading.price }}</td>
@@ -96,26 +96,23 @@
         <td>{{ reading.date_of_sale.strftime('%d-%m-%Y') }}</td>
         <td>{{ reading.date_created.strftime('%d-%m-%Y %I:%M %p') }}</td>
         <td class="text-center">
-          <!-- Delete (triggers modal) -->
           <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
             data-delete-url="{{ url_for('transactions_bp.delete_meter_reading', reading_id=reading.id) }}"
             data-reading-id="{{ reading.id }}">
             <i class="fas fa-trash-alt"></i>
           </button>
         </td>
-
       </tr>
       {% endfor %}
       {% else %}
       <tr>
-        <td colspan="14" class="text-center text-muted">No meter reading data found.</td>
+        <td colspan="15" class="text-center text-muted">No meter reading data found.</td>
       </tr>
       {% endif %}
     </tbody>
   </table>
 </div>
 {% endif %}
-
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
@@ -136,7 +133,6 @@
   </div>
 </div>
 
-
 {# --- Diesel Reading Table (D1-D4) --- #}
 {% if report_type == ReportType.D14_READING.value or report_type == ReportType.ALL.value %}
 <div class="table-container overflow-auto mt-2">
@@ -145,22 +141,22 @@
     <thead>
       <tr>
         <th scope="col">ID</th>
-        <th scope="col">Session/Shift ID</th>
-        <th scope="col">Section</th>
-        <th scope="col">D1 Opening</th>
-        <th scope="col">D1 Closing</th>
-        <th scope="col">D2 Opening</th>
-        <th scope="col">D2 Closing</th>
-        <th scope="col">D3 Opening</th>
-        <th scope="col">D3 Closing</th>
-        <th scope="col">D4 Opening</th>
-        <th scope="col">D4 Closing</th>
-        <th scope="col">RTT (Liters)</th>
-        <th scope="col">Liters Sold</th>
+        <th scope="col">Section</th> 
+        <!-- <th scope="col">Session/Shift ID</th> -->
+        <th scope="col">D1-Opening</th>
+        <th scope="col">D1-Closing</th>
+        <th scope="col">D2-Opening</th>
+        <th scope="col">D2-Closing</th>
+        <th scope="col">D3-Opening</th>
+        <th scope="col">D3-Closing</th>
+        <th scope="col">D4-Opening</th>
+        <th scope="col">D4-Closing</th>
+        <th scope="col">RTT</th>
+        <th scope="col">Sale Litre</th>
         <th scope="col">Price</th>
         <th scope="col">Total</th>
         <th scope="col">CSA Name</th>
-        <th scope="col">Date of Sale</th>
+        <th scope="col">Sale Date</th>
         <th scope="col">Date Created</th>
         <th scope="col">Actions</th>
       </tr>
@@ -171,8 +167,8 @@
       {% for reading in d14_results %}
       <tr>
         <td>{{ reading.id }}</td>
-        <td class="text-danger">{{ reading.session_id }}</td>
-        <td>{{ reading.section }}</td>
+        <td class="fw-bold text-primary">{{ reading.section }}</td> 
+        {# <td class="text-danger">{{ reading.session_id }}</td> #}
         <td>{{ reading.d1_opening }}</td>
         <td>{{ reading.d1_closing }}</td>
         <td>{{ reading.d2_opening }}</td>
@@ -189,7 +185,6 @@
         <td>{{ reading.date_of_sale.strftime('%d-%m-%Y') }}</td>
         <td>{{ reading.date_created.strftime('%d-%m-%Y %I:%M %p') }}</td>
         <td class="text-center">
-          <!-- Delete (triggers modal) -->
           <button class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
             data-delete-url="{{ url_for('transactions_bp.delete_d14_reading', reading_id=reading.id) }}"
             data-reading-id="{{ reading.id }}">
@@ -208,7 +203,6 @@
 </div>
 {% endif %}
 
-
 {# --- CREDIT TRANSACTIONS REPORT --- #}
 {% if report_type == ReportType.CREDIT.value or report_type == ReportType.ALL.value %}
 <div class="table-container overflow-auto mt-2">
@@ -217,7 +211,7 @@
     <thead>
       <tr>
         <th scope="col">ID</th>
-        <th scope="col">Session/Shift ID</th>
+        <th scope="col">Section</th>
         <th scope="col">GCB</th>
         <th scope="col">MoMo</th>
         <th scope="col">Tingg</th>
@@ -230,7 +224,7 @@
         <th scope="col">Fidelity</th>
         <th scope="col">Credit AB</th>
         <th scope="col">Credit CF</th>
-        <th scope="col">Credit ZM</th>
+        <th scope="col">Credit GC</th>
         <th scope="col">Credit WL</th>
         <th scope="col">Credit ZL</th>
         <th scope="col">Water Bill</th>
@@ -272,13 +266,17 @@
       total_water_bill=0,
       total_ecg_bill=0,
       total_genset=0,
-      total_approve_miscellaneous=0
+      total_approve_miscellaneous=0,
+      total_total_collections=0,
+      total_total_credit=0,
+      total_cash_to_bank=0,
+      total_grand_total=0
       ) %}
 
       {% for c in credit_results %}
       <tr>
         <td>{{ c.id }}</td>
-        <td class="text-danger">{{ c.session_id }}</td>
+        <td class="fw-bold text-primary">{{ c.session.section if c.session else 'N/A' }}</td>
         <td>{{ display_val(c.gcb) }}</td>
         <td>{{ display_val(c.momo) }}</td>
         <td>{{ display_val(c.tingg) }}</td>
@@ -309,7 +307,7 @@
         <td>{{ display_val(c.duster_collection) }}</td>
         <td class="text-danger fw-bold">{{ c.total_collection }}</td>
         <td class="text-danger fw-bold">{{ c.total_credit }}</td>
-        <td class="text-success fw-bold">{{ "%.2f"|format(c.cash_to_bank) }}</td>
+        <td class="text-danger fw-bold">{{ "%.2f"|format(c.cash_to_bank) }}</td>
         <td class="text-danger fw-bold">{{ c.grand_total }}</td>
         <td>{{ c.date_created.strftime('%d-%m-%Y') }}</td>
       </tr>
@@ -329,6 +327,10 @@
       {% set ns.total_ecg_bill = ns.total_ecg_bill + (c.ecg_bill or 0) %}
       {% set ns.total_genset = ns.total_genset + (c.genset or 0) %}
       {% set ns.total_approve_miscellaneous = ns.total_approve_miscellaneous + (c.approve_miscellaneous or 0) %}
+      {% set ns.total_total_collections = ns.total_total_collections + (c.total_collection or 0) %}
+      {% set ns.total_total_credit = ns.total_total_credit + (c.total_credit or 0) %}
+      {% set ns.total_cash_to_bank = ns.total_cash_to_bank + (c.cash_to_bank or 0) %}
+      {% set ns.total_grand_total = ns.total_grand_total + (c.grand_total or 0) %}
       {% endfor %}
 
       {# --- Totals row --- #}
@@ -345,11 +347,12 @@
         <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_ecobank) }}</td>
         <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_fidelity) }}</td>
         <td colspan="5"></td>
-        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_water_bill) }}</td>
-        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_ecg_bill) }}</td>
-        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_genset) }}</td>
-        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_approve_miscellaneous) }}</td>
-        <td colspan="14"></td>
+        <td colspan="13"></td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_total_collections) }}</td>
+        <td class="text-success fw-bold">{{ "%.2f"|format(ns.total_total_credit) }}</td>
+        <td class="text-danger fw-bold">{{ "%.2f"|format(ns.total_cash_to_bank) }}</td>
+        <td class="text-danger fw-bold">{{ "%.2f"|format(ns.total_grand_total) }}</td>
+        <td></td>
       </tr>
 
       {% else %}
@@ -362,16 +365,16 @@
 </div>
 {% endif %}
 
-
-
 {# --- PAPER TRANSACTIONS REPORT --- #}
 {% if report_type == ReportType.PAPER.value or report_type == ReportType.ALL.value %}
 <div class="table-container overflow-auto mt-2">
   <h5 class="mb-3 text-danger">Paper - Cash Report</h5>
+
   <table class="table table-striped table-bordered overflow-auto">
     <thead>
       <tr>
         <th scope="col">ID</th>
+        <th scope="col">Section</th> 
         <th scope="col">₵200</th>
         <th scope="col">₵100</th>
         <th scope="col">₵50</th>
@@ -384,12 +387,12 @@
       </tr>
     </thead>
     <tbody>
-      {% set paper_results = results if report_type != ReportType.ALL.value else
-      results[ReportType.PAPER.value] %}
+      {% set paper_results = results if report_type != ReportType.ALL.value else results[ReportType.PAPER.value] %}
       {% if paper_results %}
       {% for p in paper_results %}
       <tr>
         <td>{{ p.id }}</td>
+        <td class="fw-bold text-primary">{{ p.session.section if p.session else 'N/A' }}</td> 
         <td>{{ display_val(p.note_200) }}</td>
         <td>{{ display_val(p.note_100) }}</td>
         <td>{{ display_val(p.note_50) }}</td>
@@ -403,14 +406,13 @@
       {% endfor %}
       {% else %}
       <tr>
-        <td colspan="10" class="text-center text-muted">No paper transaction data found.</td>
+        <td colspan="12" class="text-center text-muted">No paper transaction data found.</td>
       </tr>
       {% endif %}
     </tbody>
   </table>
 </div>
 {% endif %}
-
 
 {# --- COINS TRANSACTIONS REPORT --- #}
 {% if report_type == ReportType.COINS.value or report_type == ReportType.ALL.value %}
@@ -420,34 +422,36 @@
     <thead>
       <tr>
         <th scope="col">ID</th>
-        <th scope="col">₵2 coin</th>
-        <th scope="col">₵1 coin</th>
-        <th scope="col">50 ps</th>
+        <th scope="col">Section</th> 
+        <th scope="col">₵2 Coin</th>
+        <th scope="col">₵1 Coin</th>
+        <th scope="col">50 Ps</th>
         <th scope="col">Date</th>
       </tr>
     </thead>
     <tbody>
-      {% set coins_results = results if report_type != ReportType.ALL.value else
-      results[ReportType.COINS.value] %}
+      {% set coins_results = results if report_type != ReportType.ALL.value else results[ReportType.COINS.value] %}
       {% if coins_results %}
       {% for co in coins_results %}
       <tr>
         <td>{{ co.id }}</td>
-        <td>{{ display_val(co.coin_5) }}</td>
-        <td>{{ display_val(co.coin_2) }}</td>
-        <td>{{ display_val(co.coin_1) }}</td>
+        <td class="fw-bold text-primary">{{ co.session.section if co.session else 'N/A' }}</td> {# ✅ Section name #}
+        <td>{{ display_val(co.coin_2) }}</td> {# ₵2 coin #}
+        <td>{{ display_val(co.coin_1) }}</td> {# ₵1 coin #}
+        <td>{{ display_val(co.coin_5) }}</td> {# 50 pesewas #}
         <td>{{ co.date_created.strftime('%d-%m-%Y') }}</td>
       </tr>
       {% endfor %}
       {% else %}
       <tr>
-        <td colspan="5" class="text-center text-muted">No coins transaction data found.</td>
+        <td colspan="7" class="text-center text-muted">No coins transaction data found.</td>
       </tr>
       {% endif %}
     </tbody>
   </table>
 </div>
 {% endif %}
+
 <div class="custom-card-header mt-1">
   <h5>Export Transactions</h5>
   <a href="{{ url_for('transactions_bp.export_transaction_report',

@@ -10,9 +10,8 @@ if __name__ == "__main__":
         # db.drop_all()
         flask_db_init() 
         seed_super_admin()
-    # app.run(host="0.0.0.0", debug=True, port=5000)
-    
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True, port=4000)
+    # app.run(debug=True)
     # serve(app, host='0.0.0.0', port=5000, threads=100)
 
 

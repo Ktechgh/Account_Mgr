@@ -32,7 +32,7 @@ placeholder=placeholder,**extra) }}
             <tr>
               <div class="mb-3 d-flex align-items-center justify-content-between mt-1">
                 <!-- Meter Table Dropdown (disabled in edit) -->
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center section-form">
                   {{ section_form.section.label(class="fw-bold text-primary me-2") }}
                   {{ section_form.section(class="form-select w-auto", id="section", disabled=True) }}
                 </div>
@@ -157,7 +157,7 @@ placeholder=placeholder,**extra) }}
             <td colspan="4" class="text-bg-secondary">
               <i class="fa fa-arrow-up"></i> Credits |
               <i class="fa fa-arrow-down"></i> Collections
-            </td>
+            </td> 
             <tr>
               <td>{{ render_field(credit_form.collection_wl, "Collection (Williago)", {"id": "collection_wl"}) }}</td>
               <td></td>

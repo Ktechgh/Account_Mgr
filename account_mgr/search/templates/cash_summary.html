@@ -1,89 +1,206 @@
 {% extends "layout.html" %} 
 
-{% block content_header %} 
+{% block content_header %}
+<div class="summary-table-top mb-4">
+  <div class="content-header-y mt-2">
+    <div class="mt-0 mb-2">
+      <label for="viewMode" class="fw-bold">View Mode:</label>
+      <select id="viewMode" class="form-select w-auto d-inline-block">
+        <option value="old">Daily Summary</option>
+        <option value="new">Reconciliation</option>
+      </select>
+    </div>
+  </div>
+</div>
 {% endblock content_header %} 
 
 {% block table_container %}
-<div class="container mt-4 section-card">
-  <h3 class="mb-4">{{ cash_report_title }}</h3>
-  <div class="table-responsive mt-4">
-    <table
-      class="table table-bordered table-striped text-center align-middle section-card"
-    >
-      <thead class="table-dark">
-        <tr>
-          <th class="text-white">Denomination</th>
-          <th class="text-white">Pieces</th>
-          <th class="text-white">Value (₵)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Paper Notes -->
-        <tr>
-          <td>₵200</td>
-          <td>{{ paper_totals.note_200 }}</td>
-          <td>{{ paper_totals.note_200 * 200 }}</td>
-        </tr>
-        <tr>
-          <td>₵100</td>
-          <td>{{ paper_totals.note_100 }}</td>
-          <td>{{ paper_totals.note_100 * 100 }}</td>
-        </tr>
-        <tr>
-          <td>₵50</td>
-          <td>{{ paper_totals.note_50 }}</td>
-          <td>{{ paper_totals.note_50 * 50 }}</td>
-        </tr>
-        <tr>
-          <td>₵20</td>
-          <td>{{ paper_totals.note_20 }}</td>
-          <td>{{ paper_totals.note_20 * 20 }}</td>
-        </tr>
-        <tr>
-          <td>₵10</td>
-          <td>{{ paper_totals.note_10 }}</td>
-          <td>{{ paper_totals.note_10 * 10 }}</td>
-        </tr>
-        <tr>
-          <td>₵5</td>
-          <td>{{ paper_totals.note_5 }}</td>
-          <td>{{ paper_totals.note_5 * 5 }}</td>
-        </tr>
-        <tr>
-          <td>₵2</td>
-          <td>{{ paper_totals.note_2 }}</td>
-          <td>{{ paper_totals.note_2 * 2 }}</td>
-        </tr>
-        <tr>
-          <td>₵1</td>
-          <td>{{ paper_totals.note_1 }}</td>
-          <td>{{ paper_totals.note_1 * 1 }}</td>
-        </tr>
+<!-- ======== ORIGINAL VIEW (NORMAL DENOMINATIONS) ======== -->
+<div id="oldView">
+  <div class="container mt-0 section-card">
+    <h3 class="mb-4">
+      {{ cash_report_title }} — <span class="text-primary">Original</span>
+    </h3>
+    <div class="table-responsive mt-4">
+      <table
+        class="table table-bordered table-striped text-center align-middle section-card"
+      >
+        <thead class="table-dark">
+          <tr>
+            <th class="text-white">Denomination</th>
+            <th class="text-white">Pieces</th>
+            <th class="text-white">Value (₵)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Paper Notes -->
+          <tr>
+            <td>₵200</td>
+            <td>{{ paper_totals.note_200 }}</td>
+            <td>{{ paper_totals.note_200 * 200 }}</td>
+          </tr>
+          <tr>
+            <td>₵100</td>
+            <td>{{ paper_totals.note_100 }}</td>
+            <td>{{ paper_totals.note_100 * 100 }}</td>
+          </tr>
+          <tr>
+            <td>₵50</td>
+            <td>{{ paper_totals.note_50 }}</td>
+            <td>{{ paper_totals.note_50 * 50 }}</td>
+          </tr>
+          <tr>
+            <td>₵20</td>
+            <td>{{ paper_totals.note_20 }}</td>
+            <td>{{ paper_totals.note_20 * 20 }}</td>
+          </tr>
+          <tr>
+            <td>₵10</td>
+            <td>{{ paper_totals.note_10 }}</td>
+            <td>{{ paper_totals.note_10 * 10 }}</td>
+          </tr>
+          <tr>
+            <td>₵5</td>
+            <td>{{ paper_totals.note_5 }}</td>
+            <td>{{ paper_totals.note_5 * 5 }}</td>
+          </tr>
+          <tr>
+            <td>₵2</td>
+            <td>{{ paper_totals.note_2 }}</td>
+            <td>{{ paper_totals.note_2 * 2 }}</td>
+          </tr>
+          <tr>
+            <td>₵1</td>
+            <td>{{ paper_totals.note_1 }}</td>
+            <td>{{ paper_totals.note_1 * 1 }}</td>
+          </tr>
 
-        <!-- Coins -->
-        <tr>
-          <td>₵2 Coin</td>
-          <td>{{ coin_totals.coin_2 }}</td>
-          <td>{{ coin_totals.coin_2 * 2 }}</td>
-        </tr>
-        <tr>
-          <td>₵1 Coin</td>
-          <td>{{ coin_totals.coin_1 }}</td>
-          <td>{{ coin_totals.coin_1 * 1 }}</td>
-        </tr>
-        <tr>
-          <td>₵5 Coin</td>
-          <td>{{ coin_totals.coin_5 }}</td>
-          <td>{{ '%.2f'|format(coin_totals.coin_5 * 0.5) }}</td>
-        </tr>
-      </tbody>
-      <tfoot class="table-warning fw-bold">
-        <tr>
-          <td colspan="2">Cash to bank</td>
-          <td class="text-bg-success">₵{{ "%.2f"|format(total_value) }}</td>
-        </tr>
-      </tfoot>
-    </table>
+          <!-- Coins -->
+          <tr>
+            <td>₵2 Coin</td>
+            <td>{{ coin_totals.coin_2 }}</td>
+            <td>{{ coin_totals.coin_2 * 2 }}</td>
+          </tr>
+          <tr>
+            <td>₵1 Coin</td>
+            <td>{{ coin_totals.coin_1 }}</td>
+            <td>{{ coin_totals.coin_1 * 1 }}</td>
+          </tr>
+          <tr>
+            <td>₵0.50 Coin</td>
+            <td>{{ coin_totals.coin_5 }}</td>
+            <td>{{ '%.2f'|format(coin_totals.coin_5 * 0.5) }}</td>
+          </tr>
+        </tbody>
+        <tfoot class="table-warning fw-bold">
+          <tr>
+            <td colspan="2">Cash to bank</td>
+            <td class="text-bg-success">₵{{ "%.2f"|format(total_value) }}</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="text-center text-secondary">
+              <em>({{ total_value_words|capitalize }})</em>
+            </td>
+          </tr>
+        </tfoot>
+
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- style="display: none;" -->
+<!-- ======== NEW VIEW (RECONCILED DENOMINATIONS) ======== -->
+<div id="newView">
+  <div class="container mt-0 section-card">
+    <h3 class="mb-4">
+      {{ cash_report_title }} — <span class="text-success">Reconciled</span>
+    </h3>
+    <div class="table-responsive mt-4">
+      <table
+        class="table table-bordered table-striped text-center align-middle section-card"
+      >
+        <thead class="table-dark">
+          <tr>
+            <th class="text-white">Denomination</th>
+            <th class="text-white">Pieces</th>
+            <th class="text-white">Value (₵)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Paper Notes -->
+          <tr>
+            <td>₵200</td>
+            <td>{{ rec_paper_totals.note_200 }}</td>
+            <td>{{ rec_paper_totals.note_200 * 200 }}</td>
+          </tr>
+          <tr>
+            <td>₵100</td>
+            <td>{{ rec_paper_totals.note_100 }}</td>
+            <td>{{ rec_paper_totals.note_100 * 100 }}</td>
+          </tr>
+          <tr>
+            <td>₵50</td>
+            <td>{{ rec_paper_totals.note_50 }}</td>
+            <td>{{ rec_paper_totals.note_50 * 50 }}</td>
+          </tr>
+          <tr>
+            <td>₵20</td>
+            <td>{{ rec_paper_totals.note_20 }}</td>
+            <td>{{ rec_paper_totals.note_20 * 20 }}</td>
+          </tr>
+          <tr>
+            <td>₵10</td>
+            <td>{{ rec_paper_totals.note_10 }}</td>
+            <td>{{ rec_paper_totals.note_10 * 10 }}</td>
+          </tr>
+          <tr>
+            <td>₵5</td>
+            <td>{{ rec_paper_totals.note_5 }}</td>
+            <td>{{ rec_paper_totals.note_5 * 5 }}</td>
+          </tr>
+          <tr>
+            <td>₵2</td>
+            <td>{{ rec_paper_totals.note_2 }}</td>
+            <td>{{ rec_paper_totals.note_2 * 2 }}</td>
+          </tr>
+          <tr>
+            <td>₵1</td>
+            <td>{{ rec_paper_totals.note_1 }}</td>
+            <td>{{ rec_paper_totals.note_1 * 1 }}</td>
+          </tr>
+
+          <!-- Coins -->
+          <tr>
+            <td>₵2 Coin</td>
+            <td>{{ rec_coin_totals.coin_2 }}</td>
+            <td>{{ rec_coin_totals.coin_2 * 2 }}</td>
+          </tr>
+          <tr>
+            <td>₵1 Coin</td>
+            <td>{{ rec_coin_totals.coin_1 }}</td>
+            <td>{{ rec_coin_totals.coin_1 * 1 }}</td>
+          </tr>
+          <tr>
+            <td>₵0.50 Coin</td>
+            <td>{{ rec_coin_totals.coin_5 }}</td>
+            <td>{{ '%.2f'|format(rec_coin_totals.coin_5 * 0.5) }}</td>
+          </tr>
+        </tbody>
+        <tfoot class="table-warning fw-bold">
+          <tr>
+            <td colspan="2">Cash to bank (Reconciled)</td>
+            <td class="text-bg-success">₵{{ "%.2f"|format(rec_total_value) }}</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="text-center text-secondary">
+              <em>({{ rec_total_value_words|capitalize }})</em>
+            </td>
+          </tr>
+        </tfoot>
+
+      </table>
+    </div>
   </div>
 </div>
 

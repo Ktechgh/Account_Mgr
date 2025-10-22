@@ -121,8 +121,9 @@ input {
   .right {
     justify-content: center;
     align-items: center;
-    padding-top: 4rem;
-    min-height: 60vh;
+    padding-top: 3.5rem;
+    min-height: 50vh;
+    /* min-height: 60vh; */
   }
 
   .right h2 {
@@ -142,7 +143,7 @@ input {
   }
 
   h2 {
-    font-size: 2rem !important;
+    font-size: 1.2rem !important;
     font-family: table-font;
   }
 }

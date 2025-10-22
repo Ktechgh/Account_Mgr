@@ -239,14 +239,12 @@ document.addEventListener("DOMContentLoaded", () => {
     "credit_wl",
     "credit_zl",
     "soc_staff_credit",
-
     "republic",
     "prudential",
     "adb",
     "stanbic",
     "ecobank",
     "fidelity",
-
     "water_bill",
     "ecg_bill",
     "genset",
@@ -338,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(() => {}); // silent fail
   }
 
-  // ✅ FIXED: Separate paper vs coins based on field name instead of denom value
+  // Separate paper vs coins based on field name instead of denom value
   function calcPhysicalCash() {
     let paperTotal = 0;
     let coinTotal = 0;
@@ -367,14 +365,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (expectedCashToBank > 0 && els2.status) {
       const roundedPhysical = Math.round(totalPhysical);
       const roundedExpected = Math.round(expectedCashToBank);
+      const diff = roundedPhysical - roundedExpected;
+
+      // Reset colors before applying
+      els2.status.style.backgroundColor = "";
+      if (els2.totalPhysical) els2.totalPhysical.style.backgroundColor = "";
 
       if (roundedPhysical === roundedExpected) {
         els2.status.value = "✅ Cash Balanced!";
         els2.status.style.color = "green";
-      } else {
-        const diff = roundedPhysical - roundedExpected;
-        els2.status.value = `❌ Mismatch/Shortage (Diff: ${diff})`;
+        els2.status.style.backgroundColor = "#d4edda"; // light green
+        if (els2.totalPhysical)
+          els2.totalPhysical.style.backgroundColor = "#d4edda";
+      } else if (roundedPhysical < roundedExpected) {
+        els2.status.value = `❌ Shortage (Diff: ${diff})`;
         els2.status.style.color = "red";
+        els2.status.style.backgroundColor = "#f8d7da"; // light red
+        if (els2.totalPhysical)
+          els2.totalPhysical.style.backgroundColor = "#f8d7da";
+      } else if (roundedPhysical > roundedExpected) {
+        els2.status.value = `⚠️ Excess (Diff: +${diff})`;
+        els2.status.style.color = "orange";
+        els2.status.style.backgroundColor = "#fff3cd"; // light orange
+        if (els2.totalPhysical)
+          els2.totalPhysical.style.backgroundColor = "#fff3cd";
       }
     }
   }
@@ -401,7 +415,3 @@ document.getElementById("section")?.addEventListener("change", (e) => {
   if (hidden) hidden.value = e.target.value;
 });
 // End of hidden field sync
-
-// ✅ Rounded values
-// if (els.cashToBank) els.cashToBank.value = Math.round(expectedCashToBank).toFixed(2);
-// if (els.grandTotal) els.grandTotal.value = Math.round(grandTotal).toFixed(2);

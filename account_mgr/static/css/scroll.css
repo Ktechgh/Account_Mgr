@@ -1,0 +1,67 @@
+/* --- Edit Buttons Scroll Container --- */
+.edit-buttons-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 4px;
+  /* small space for scrollbar */
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: #ccc transparent;
+}
+
+.edit-buttons-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.edit-buttons-container::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 10px;
+}
+
+.edit-buttons-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (max-width: 768px) {
+  .edit-buttons-container {
+    padding-left: 216px !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    margin-top: 3.4rem !important;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 320px) {
+  .edit-buttons-container {
+    padding-left: 216px !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    margin-top: 3.6rem !important;
+    justify-content: center;
+  }
+}
+
+/* =====The bottom css controls both Click plus button & Choose Meter ==== */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(213, 231, 226);
+  padding: 1rem;
+  overflow-x: auto;
+  /* Enables horizontal scroll if needed */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Ensure the header and select section wrap properly */
+.custom-card-header,
+.section-form {
+  display: flex;
+  flex-wrap: wrap;
+  /* Allow text + button to wrap instead of squashing */
+  justify-content: space-between;
+  /* Keep button aligned to the right */
+  align-items: center;
+  gap: 0.1rem;
+  /* Add a little breathing space between elements */
+}

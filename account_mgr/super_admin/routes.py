@@ -583,44 +583,55 @@ def secure_adashboard():
         # ----------- DENOMINATIONS -----------------
         elif "submit_denomination" in request.form:
             try:
-                selected_section = request.form.get(
-                    key="selected_section", default="S1S2"
-                )
+                selected_section = request.form.get("selected_section", "S1S2")
+                is_reconciliation = selected_section == "reconciliation"
 
-                closing_session = get_session_for_section(
-                    section=selected_section,
-                    username=current_user.username,
-                    create_if_missing=False,
-                )
-
-                if not closing_session:
-                    flash(
-                        message="You must first submit a meter reading before denominations!",
-                        category="error",
+                # 🔹 Step 1: Handle Adjustment Mode
+                if is_reconciliation:
+                    # Create a temporary adjustment session (not linked to any real section)
+                    closing_session = ClosingSession(
+                        section="RECONCILIATION",
+                        admin_user_name=current_user.username,
+                        session_date=date.today(),
                     )
-                    return redirect(
-                        url_for(endpoint="super_admin_secure.secure_adashboard")
-                    )
+                    db.session.add(closing_session)
+                    db.session.flush()  # Get its ID before committing
 
-                # 🔹 Check for existing denominations
-                existing_paper = PaperTransaction.query.filter_by(
-                    session_id=closing_session.id
-                ).first()
-                existing_coins = CoinsTransaction.query.filter_by(
-                    session_id=closing_session.id
-                ).first()
-
-                if existing_paper or existing_coins:
-                    flash(
-                        message="Denominations already submitted for this session!",
-                        category="error",
-                    )
-                    return redirect(
-                        url_for(endpoint="super_admin_secure.secure_adashboard")
+                # 🔹 Step 2: Handle Normal Mode
+                else:
+                    closing_session = get_session_for_section(
+                        section=selected_section,
+                        username=current_user.username,
+                        create_if_missing=False,
                     )
 
+                    # Ensure a session exists before proceeding
+                    if not closing_session:
+                        flash(
+                            message="You must first submit a meter reading before denominations!",
+                            category="error",
+                        )
+                        return redirect(url_for("super_admin_secure.secure_adashboard"))
+
+                    # Prevent duplicate denominations for same session
+                    existing_paper = PaperTransaction.query.filter_by(
+                        session_id=closing_session.id
+                    ).first()
+                    existing_coins = CoinsTransaction.query.filter_by(
+                        session_id=closing_session.id
+                    ).first()
+
+                    if existing_paper or existing_coins:
+                        flash(
+                            message="Denominations already submitted for this session!",
+                            category="error",
+                        )
+                        return redirect(url_for("super_admin_secure.secure_adashboard"))
+
+                # 🔹 Step 3: Save Denominations
                 saved_any = False
 
+                # ---------- PAPER ----------
                 if paper_form.validate_on_submit():
                     paper_tx = PaperTransaction(
                         session_id=closing_session.id,
@@ -632,33 +643,39 @@ def secure_adashboard():
                         note_5=paper_form.note_5.data or 0,
                         note_2=paper_form.note_2.data or 0,
                         note_1=paper_form.note_1.data or 0,
+                        is_reconciliation=is_reconciliation,
                     )
                     db.session.add(paper_tx)
                     saved_any = True
 
+                # ---------- COINS ----------
                 if coins_form.validate_on_submit():
                     coin_tx = CoinsTransaction(
                         session_id=closing_session.id,
                         coin_5=coins_form.coin_5.data or 0,
                         coin_2=coins_form.coin_2.data or 0,
                         coin_1=coins_form.coin_1.data or 0,
+                        is_reconciliation=is_reconciliation,
                     )
                     db.session.add(coin_tx)
                     saved_any = True
 
+                # 🔹 Step 4: Commit and Notify
                 if saved_any:
                     db.session.commit()
+                    msg_type = "Adjustment" if is_reconciliation else selected_section
                     flash(
-                        message=f"Denomination(s) saved successfully for {selected_section}",
+                        message=f"Denomination(s) saved successfully for {msg_type}",
                         category="success",
                     )
                 else:
                     flash(message="No denomination data provided", category="error")
+
             except Exception as e:
                 db.session.rollback()
                 flash(message=f"Error saving denominations: {str(e)}", category="error")
 
-            return redirect(url_for(endpoint="super_admin_secure.secure_adashboard"))
+            return redirect(url_for("super_admin_secure.secure_adashboard"))
 
     return render_template(
         "layout.html",

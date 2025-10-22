@@ -13,7 +13,7 @@ function resetTimer() {
 
 
   // Show alert at 4.5 minutes
-  warningTimer = setTimeout(showWarning, 270000); // 4.5 mins = 270,000 ms
+  warningTimer = setTimeout(showWarning, 300000); // 4.5 mins = 270,000 ms
 }
 
 function showWarning() {

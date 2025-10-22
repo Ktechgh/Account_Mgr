@@ -1,8 +1,10 @@
 import io
 import pandas as pd
 from enum import Enum
+from sqlalchemy import or_
 from account_mgr import db
 from flask import send_file
+from num2words import num2words
 from .message import message_map
 from datetime import datetime, time
 from flask_login import login_required
@@ -222,7 +224,7 @@ def export_transaction_report():
         def meter_reading_mapper(r):
             return [
                 r.id,
-                r.session_id,
+                getattr(r.session, "section", "N/A"),
                 r.super_1_opening,
                 r.super_2_opening,
                 r.super_1_closing,
@@ -238,12 +240,12 @@ def export_transaction_report():
 
         meter_reading_cols = [
             "ID",
-            "Session ID",
+            "Section",
             "Super 1 Opening",
             "Super 2 Opening",
             "Super 1 Closing",
             "Super 2 Closing",
-            "Liters Sold",
+            "Sale Liter",
             "RTT",
             "Price",
             "Total",
@@ -255,8 +257,8 @@ def export_transaction_report():
         def d14_mapper(r):
             return [
                 r.id,
-                r.session_id,
-                r.section,
+                getattr(r.session, "section", "N/A"),
+                # r.section,
                 r.d1_opening,
                 r.d1_closing,
                 r.d2_opening,
@@ -276,7 +278,6 @@ def export_transaction_report():
 
         d14_cols = [
             "ID",
-            "Session ID",
             "Section",
             "D1 Opening",
             "D1 Closing",
@@ -286,8 +287,8 @@ def export_transaction_report():
             "D3 Closing",
             "D4 Opening",
             "D4 Closing",
-            "RTT (Liters)",
-            "Liters Sold",
+            "RTT",
+            "Sale Liter",
             "Price",
             "Total",
             "CSA Name",
@@ -298,7 +299,7 @@ def export_transaction_report():
         def credit_mapper(r):
             return [
                 r.id,
-                r.session_id,
+                getattr(r.session, "section", "N/A"),
                 r.gcb,
                 r.momo,
                 r.tingg,
@@ -334,7 +335,7 @@ def export_transaction_report():
 
         credit_cols = [
             "ID",
-            "Session ID",
+            "Section",
             "GCB",
             "MoMo",
             "Tingg",
@@ -371,6 +372,7 @@ def export_transaction_report():
         def paper_mapper(r):
             return [
                 r.id,
+                getattr(r.session, "section", "N/A"),
                 r.note_200,
                 r.note_100,
                 r.note_50,
@@ -384,6 +386,7 @@ def export_transaction_report():
 
         paper_cols = [
             "ID",
+            "Section",
             "₵200",
             "₵100",
             "₵50",
@@ -398,13 +401,14 @@ def export_transaction_report():
         def coins_mapper(r):
             return [
                 r.id,
+                getattr(r.session, "section", "N/A"),
                 r.coin_5,
                 r.coin_2,
                 r.coin_1,
                 r.date_created.strftime("%d-%m-%Y"),
             ]
 
-        coins_cols = ["ID", "₵2 coin", "₵1 coin", "50 ps", "Date"]
+        coins_cols = ["ID", "Section", "₵2 coin", "₵1 coin", "50 ps", "Date"]
 
         # ---------- EXPORT ----------
         if isinstance(results, dict):  # ALL
@@ -466,39 +470,62 @@ def export_transaction_report():
     )
 
 
-# ---------------- CASH SUMMARY -----------------
+def amount_to_words(amount):
+    """
+    Convert numeric currency amount to proper Ghana Cedis words.
+    Handles both whole and decimal parts accurately.
+    Example: 46341.25 -> 'Forty-six thousand, three hundred and forty-one Ghana cedis, twenty-five pesewas'
+    """
+    amount = round(float(amount), 2)
+    cedis = int(amount)
+    pesewas = int(round((amount - cedis) * 100))
+
+    cedis_words = num2words(cedis, lang="en").replace("-", " ").capitalize()
+    if pesewas > 0:
+        pesewas_words = num2words(pesewas, lang="en").replace("-", " ")
+        return f"{cedis_words} Ghana cedis, {pesewas_words} pesewas"
+    else:
+        return f"{cedis_words} Ghana cedis only"
+
+
 @transactions_bp.route(rule="/cash_summary", methods=["GET", "POST"])
 @login_required
 def cash_summary():
     form_cash = CashSummaryForm()
     cash_report_title = "Cash Summary Report"
 
-    # Initialize totals
-    paper_totals = {f"note_{val}": 0 for val in [200, 100, 50, 20, 10, 5, 2, 1]}
-    coin_totals = {f"coin_{val}": 0 for val in [5, 2, 1]}
+    def get_totals(
+        is_reconciliation=False, start_date=None, end_date=None, report_type="all"
+    ):
+        """Helper function to compute totals for either normal or reconciled entries."""
+        paper_totals = {f"note_{val}": 0 for val in [200, 100, 50, 20, 10, 5, 2, 1]}
+        coin_totals = {f"coin_{val}": 0 for val in [5, 2, 1]}
 
-    # New variables for liters
-    total_s_liters = 0  # S1–S4
-    total_d_liters = 0  # D1–D4
-    combined_liters = 0
-
-    if form_cash.validate_on_submit():
-        report_type = form_cash.cash_report_type.data
-        start_date = form_cash.start_date.data
-        end_date = form_cash.end_date.data
         start_datetime = datetime.combine(start_date, time.min)
         end_datetime = datetime.combine(end_date, time.max)
 
-        # Track if we got any data
-        has_data = False
+        # ✅ Use correct filter based on reconciliation
+        if is_reconciliation:
+            paper_filter = PaperTransaction.is_reconciliation.is_(True)
+            coin_filter = CoinsTransaction.is_reconciliation.is_(True)
+        else:
+            paper_filter = or_(
+                PaperTransaction.is_reconciliation.is_(False),
+                PaperTransaction.is_reconciliation.is_(None),
+            )
+            coin_filter = or_(
+                CoinsTransaction.is_reconciliation.is_(False),
+                CoinsTransaction.is_reconciliation.is_(None),
+            )
 
-        # Papers
+        # 🔹 Query paper only if user requested "all" or "paper"
+        paper_rows = []
         if report_type in ["all", "paper"]:
             paper_rows = PaperTransaction.query.filter(
-                PaperTransaction.date_created.between(start_datetime, end_datetime)
+                paper_filter,
+                PaperTransaction.date_created.between(start_datetime, end_datetime),
             ).all()
-            if paper_rows:
-                has_data = True
+
             for row in paper_rows:
                 paper_totals["note_200"] += row.note_200 or 0
                 paper_totals["note_100"] += row.note_100 or 0
@@ -509,120 +536,104 @@ def cash_summary():
                 paper_totals["note_2"] += row.note_2 or 0
                 paper_totals["note_1"] += row.note_1 or 0
 
-        # Coins
+        # 🔹 Query coins only if user requested "all" or "coins"
+        coins_rows = []
         if report_type in ["all", "coins"]:
             coins_rows = CoinsTransaction.query.filter(
-                CoinsTransaction.date_created.between(start_datetime, end_datetime)
+                coin_filter,
+                CoinsTransaction.date_created.between(start_datetime, end_datetime),
             ).all()
-            if coins_rows:
-                has_data = True
+
             for row in coins_rows:
                 coin_totals["coin_5"] += row.coin_5 or 0
                 coin_totals["coin_2"] += row.coin_2 or 0
                 coin_totals["coin_1"] += row.coin_1 or 0
 
-        # Super (S1–S4) liters
+        # 🔹 Total value (only include what was selected)
+        total_value = 0
+        if report_type in ["all", "paper"]:
+            total_value += (
+                paper_totals["note_200"] * 200
+                + paper_totals["note_100"] * 100
+                + paper_totals["note_50"] * 50
+                + paper_totals["note_20"] * 20
+                + paper_totals["note_10"] * 10
+                + paper_totals["note_5"] * 5
+                + paper_totals["note_2"] * 2
+                + paper_totals["note_1"] * 1
+            )
+
+        if report_type in ["all", "coins"]:
+            total_value += (
+                coin_totals["coin_5"] * 0.5
+                + coin_totals["coin_2"] * 2
+                + coin_totals["coin_1"] * 1
+            )
+
+        return paper_totals, coin_totals, total_value
+
+    # Default values
+    paper_totals = coin_totals = {}
+    rec_paper_totals = rec_coin_totals = {}
+    total_value = rec_total_value = 0
+    total_s_liters = total_d_liters = combined_liters = 0
+
+    total_value_words = ""
+    rec_total_value_words = ""
+
+    if form_cash.validate_on_submit():
+        start_date = form_cash.start_date.data
+        end_date = form_cash.end_date.data
+        report_type = form_cash.cash_report_type.data
+
+        # 🔹 Fetch both normal and reconciled data, using report_type properly
+        paper_totals, coin_totals, total_value = get_totals(
+            False, start_date, end_date, report_type
+        )
+        rec_paper_totals, rec_coin_totals, rec_total_value = get_totals(
+            True, start_date, end_date, report_type
+        )
+
+        # 🔹 Liters summary
         s_rows = MeterReading.query.filter(
-            MeterReading.date_created.between(start_datetime, end_datetime)
+            MeterReading.date_created.between(
+                datetime.combine(start_date, time.min),
+                datetime.combine(end_date, time.max),
+            )
         ).all()
-        if s_rows:
-            has_data = True
-        total_s_liters = sum([row.liters_sold for row in s_rows])
 
-        # Diesel (D1–D4) liters
         d_rows = D14Reading.query.filter(
-            D14Reading.date_created.between(start_datetime, end_datetime)
+            D14Reading.date_created.between(
+                datetime.combine(start_date, time.min),
+                datetime.combine(end_date, time.max),
+            )
         ).all()
-        if d_rows:
-            has_data = True
-        total_d_liters = sum([row.liters_sold for row in d_rows])
 
-        # Combined
+        total_s_liters = sum(row.liters_sold for row in s_rows)
+        total_d_liters = sum(row.liters_sold for row in d_rows)
         combined_liters = total_s_liters + total_d_liters
 
-        # ✅ Flash message like AA
-        if has_data:
-            flash(message=message_map["success"], category="success")
-        else:
-            flash(message=message_map["error"], category="error")
+        total_value_words = amount_to_words(total_value)
+        rec_total_value_words = amount_to_words(rec_total_value)
 
-    # Cash total
-    total_value = (
-        paper_totals["note_200"] * 200
-        + paper_totals["note_100"] * 100
-        + paper_totals["note_50"] * 50
-        + paper_totals["note_20"] * 20
-        + paper_totals["note_10"] * 10
-        + paper_totals["note_5"] * 5
-        + paper_totals["note_2"] * 2
-        + paper_totals["note_1"] * 1
-        + coin_totals["coin_2"] * 2
-        + coin_totals["coin_1"] * 1
-        + coin_totals["coin_5"] * 0.5
-    )
+        flash(message="Cash summary generated successfully!", category="success")
 
     return render_template(
         "cash_summary.html",
         form_cash=form_cash,
+        cash_report_title=cash_report_title,
         paper_totals=paper_totals,
         coin_totals=coin_totals,
         total_value=total_value,
-        cash_report_title=cash_report_title,
+        total_value_words=total_value_words,
+        rec_paper_totals=rec_paper_totals,
+        rec_coin_totals=rec_coin_totals,
+        rec_total_value=rec_total_value,
+        rec_total_value_words=rec_total_value_words,
         total_s_liters=total_s_liters,
         total_d_liters=total_d_liters,
         combined_liters=combined_liters,
     )
-
-
-# ---------------- DELETE METER READING -----------------
-@transactions_bp.route(rule="/account_mgr/delete_meter_reading/<int:reading_id>")
-@login_required
-def delete_meter_reading(reading_id):
-    # Get the meter reading
-    reading = MeterReading.query.get_or_404(reading_id)
-
-    # Get the whole session that this reading belongs to
-    session = reading.session
-
-    try:
-        # Delete the entire ClosingSession
-        db.session.delete(session)
-        db.session.commit()
-        flash(
-            message="Closing session (and all related data) deleted successfully.",
-            category="success",
-        )
-    except Exception as e:
-        db.session.rollback()
-        flash(message=f"Error deleting closing session: {str(e)}", category="error")
-
-    return redirect(url_for(endpoint="super_admin_secure.secure_adashboard"))
-
-
-# ---------------- DELETE D14 READING -----------------
-@transactions_bp.route("/account_mgr/delete_d14_reading/<int:reading_id>")
-@login_required
-def delete_d14_reading(reading_id):
-    # Get the diesel (D1-D4) reading
-    reading = D14Reading.query.get_or_404(reading_id)
-
-    # Get the ClosingSession that this reading belongs to
-    session = reading.session
-
-    try:
-        # Delete the entire ClosingSession (cascade deletes all linked data)
-        db.session.delete(session)
-        db.session.commit()
-        flash(
-            message="Closing session (and all related data) deleted successfully.",
-            category="success",
-        )
-    except Exception as e:
-        db.session.rollback()
-        flash(message=f"Error deleting closing session: {str(e)}", category="error")
-
-    # Redirect user back to dashboard
-    return redirect(url_for(endpoint="super_admin_secure.secure_adashboard"))
 
 
 @transactions_bp.route(rule="/cash_summary/export", methods=["GET"])
@@ -793,3 +804,54 @@ def export_cash_summary():
         download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
+
+# ---------------- DELETE METER READING -----------------
+@transactions_bp.route(rule="/account_mgr/delete_meter_reading/<int:reading_id>")
+@login_required
+def delete_meter_reading(reading_id):
+    # Get the meter reading
+    reading = MeterReading.query.get_or_404(reading_id)
+
+    # Get the whole session that this reading belongs to
+    session = reading.session
+
+    try:
+        # Delete the entire ClosingSession
+        db.session.delete(session)
+        db.session.commit()
+        flash(
+            message="Closing session (and all related data) deleted successfully.",
+            category="success",
+        )
+    except Exception as e:
+        db.session.rollback()
+        flash(message=f"Error deleting closing session: {str(e)}", category="error")
+
+    return redirect(url_for(endpoint="super_admin_secure.secure_adashboard"))
+
+
+# ---------------- DELETE D14 READING -----------------
+@transactions_bp.route("/account_mgr/delete_d14_reading/<int:reading_id>")
+@login_required
+def delete_d14_reading(reading_id):
+    # Get the diesel (D1-D4) reading
+    reading = D14Reading.query.get_or_404(reading_id)
+
+    # Get the ClosingSession that this reading belongs to
+    session = reading.session
+
+    try:
+        # Delete the entire ClosingSession (cascade deletes all linked data)
+        db.session.delete(session)
+        db.session.commit()
+        flash(
+            message="Closing session (and all related data) deleted successfully.",
+            category="success",
+        )
+    except Exception as e:
+        db.session.rollback()
+        flash(message=f"Error deleting closing session: {str(e)}", category="error")
+
+    # Redirect user back to dashboard
+    return redirect(url_for(endpoint="super_admin_secure.secure_adashboard"))

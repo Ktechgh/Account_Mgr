@@ -23,6 +23,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/transaction_report.css') }}" />
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/cash_report.css') }}" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/scroll.css') }}" />
 </head>
 
 <body data-logout-url="{{ logout_url }}" data-page="sales">
@@ -101,8 +103,8 @@
             <li>
               <a href="{{ url_for('account_.secure_account_update')}}">Edit profile</a>
             </li>
-            {% endblock userprofile_ %} 
-            
+            {% endblock userprofile_ %}
+
             {% block userpassword_ %}
             <li>
               <a href="{{ url_for('account_.reset_request')}}">Reset password</a>
@@ -144,17 +146,17 @@
           <div class="col mb-3">
             {{ summary_form.cash_report_type(class="form-select") }}
           </div>
-    
+
           <div class="col mb-3">
             {{ summary_form.start_date.label() }}
             {{ summary_form.start_date(class="form-control") }}
           </div>
-    
+
           <div class="col mb-3">
             {{ summary_form.end_date.label() }}
             {{ summary_form.end_date(class="form-control") }}
           </div>
-    
+
           <div class="modal-footer">
             {{ summary_form.submit(class="btn btn-success btn-md custom-wide-button btn-md", id="cashsummary-btn") }}
           </div>
@@ -207,6 +209,8 @@
         <h3>Click plus button to enter meter readings.</h3>
         <button class="add-btn" id="openModalBtn_s1s2">+</button>
       </div>
+      
+
 
       <!-- Bootstrap Stepper Modal -->
       <div class="modal fade" id="stepperModal" tabindex="-1">
@@ -216,7 +220,7 @@
               <h5 class="modal-title">Account Manager</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-      
+
             <div class="modal-body">
               <!-- Progressbar -->
               <ul class="progressbar mb-4">
@@ -225,7 +229,7 @@
                 <li data-step="step3">D1-D4</li>
                 <li data-step="step4">Stock</li>
               </ul>
-      
+
               <!-- Step 1 -->
               <form method="POST" id="step1" class="step active">
                 {{ s1s2_form.hidden_tag() }}
@@ -261,16 +265,20 @@
                   <button class="btn btn-primary next ms-2" data-next="step2">Next →</button>
                 </div>
               </form>
-      
+
               <!-- Step 2 -->
               <form method="POST" id="step2" class="step">
                 {{ s3s4_form.hidden_tag() }}
                 <h5 class="text-center mb-3 text-danger">S3 & S4 Details</h5>
                 <div class="row g-3 mb-3">
-                  <div class="col-md-6">{{ s3s4_form.super_1_opening(class="form-control", placeholder="S3 (Opening)") }}</div>
-                  <div class="col-md-6">{{ s3s4_form.super_1_closing(class="form-control", placeholder="S3 (Closing)") }}</div>
-                  <div class="col-md-6">{{ s3s4_form.super_2_opening(class="form-control", placeholder="S4 (Opening)") }}</div>
-                  <div class="col-md-6">{{ s3s4_form.super_2_closing(class="form-control", placeholder="S4 (Closing)") }}</div>
+                  <div class="col-md-6">{{ s3s4_form.super_1_opening(class="form-control", placeholder="S3 (Opening)")
+                    }}</div>
+                  <div class="col-md-6">{{ s3s4_form.super_1_closing(class="form-control", placeholder="S3 (Closing)")
+                    }}</div>
+                  <div class="col-md-6">{{ s3s4_form.super_2_opening(class="form-control", placeholder="S4 (Opening)")
+                    }}</div>
+                  <div class="col-md-6">{{ s3s4_form.super_2_closing(class="form-control", placeholder="S4 (Closing)")
+                    }}</div>
                   <div class="col-md-6">{{ s3s4_form.gsa_test_draw(class="form-control") }}</div>
                   <div class="col-md-6">{{ s3s4_form.liters_sold(class="form-control text-danger") }}</div>
                 </div>
@@ -297,7 +305,7 @@
                   <button class="btn btn-primary next ms-2" data-next="step3">Next →</button>
                 </div>
               </form>
-      
+
               <!-- Step 3 -->
               <form method="POST" id="step3" class="step">
                 {{ d1d4_form.hidden_tag() }}
@@ -305,16 +313,16 @@
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">{{ d1d4_form.d1_opening(class="form-control") }}</div>
                   <div class="col-md-6">{{ d1d4_form.d1_closing(class="form-control") }}</div>
-              
+
                   <div class="col-md-6">{{ d1d4_form.d2_opening(class="form-control") }}</div>
                   <div class="col-md-6">{{ d1d4_form.d2_closing(class="form-control") }}</div>
-              
+
                   <div class="col-md-6">{{ d1d4_form.d3_opening(class="form-control") }}</div>
                   <div class="col-md-6">{{ d1d4_form.d3_closing(class="form-control") }}</div>
-              
+
                   <div class="col-md-6">{{ d1d4_form.d4_opening(class="form-control") }}</div>
                   <div class="col-md-6">{{ d1d4_form.d4_closing(class="form-control") }}</div>
-              
+
                   <div class="col-md-6">{{ d1d4_form.rtt_liters(class="form-control") }}</div>
                   <div class="col-md-6">{{ d1d4_form.liters_sold(class="form-control text-danger") }}</div>
                 </div>
@@ -341,7 +349,7 @@
                   <button class="btn btn-primary next ms-2" data-next="step4">Next →</button>
                 </div>
               </form>
-      
+
               <!-- Step 4 -->
               <form method="POST" id="step4" class="step">
                 <h5 class="text-center mb-3 text-primary">Stock/Variation Details</h5>
@@ -356,7 +364,7 @@
                 </div>
               </form>
             </div>
-      
+
             <!-- Footer (global for all steps) -->
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -381,28 +389,32 @@
                 <tr>
                   <div class="mb-3 d-flex align-items-center justify-content-between mt-1">
                     <!-- Meter Table Dropdown -->
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center section-form">
                       {{ section_form.section.label(class="fw-bold text-primary me-1") }}
                       {{ section_form.section(class="form-select w-auto", id="section") }}
                     </div>
-                  
-                    <!-- Edit Buttons aligned to right -->
-                    <div class="d-flex align-items-center">
+
+                    <!-- Edit Buttons aligned to right with horizontal scroll -->
+                    <div class="edit-buttons-container d-flex align-items-center overflow-auto">
                       {% for cs in sessions %}
-                      <a href="{{ url_for('super_admin_secure.edit_session', session_id=cs.id) }}" class="btn btn-sm btn-warning ms-2">
-                        <i class="fas fa-edit">Edit</i>
+                      <a href="{{ url_for('super_admin_secure.edit_session', session_id=cs.id) }}"
+                        class="btn btn-sm btn-warning ms-2 flex-shrink-0">
+                        <i class="fas fa-edit"></i>
                         {{ cs.section
                         | replace("S1S2", "S1 & S2")
                         | replace("S3S4", "S3 & S4")
                         | replace("D1D4", "D1 & D4")
-                        | replace("Stock", "Stock") }}
+                        | replace("Stock", "Stock")
+                        | replace("reconciliation", "Reconciliation")
+                        }}
                       </a>
                       {% endfor %}
                     </div>
                   </div>
                 </tr>
                 <hr class="divider" />
-                <input type="hidden" name="selected_section" id="selected_section" value="{{ section_form.section.data }}" />
+                <input type="hidden" name="selected_section" id="selected_section"
+                  value="{{ section_form.section.data }}" />
                 <tr>
                   <th class="text-danger">Transactions (Electronic & Credit)</th>
                   <th class="text-danger">Cash - Paper Denominations</th>
@@ -656,15 +668,7 @@
   <script src="{{ url_for('static', filename='js/opening_meter.js') }}"></script>
   <script src="{{ url_for('static', filename='js/switch_button.js') }}"></script>
   <script src="{{ url_for('static', filename='js/delete_confirm.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cash_summary.js') }}"></script>
 </body>
+
 </html>
-
-
-
-
-
-
-                
-                
-                
-                
