@@ -34,9 +34,9 @@ DATABASE_PATH = os.path.join(APP_DATABASE, "account_mgr_db.db")
 
 app.config["SECRET_KEY"] = SECRET_KEY
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    os.getenv("DATABASE_URL_LOCAL")  # Try local first
-    or os.getenv("DATABASE_URL")  # Then production
-    or f"sqlite:///{DATABASE_PATH}"  # Fallback
+    os.getenv("DATABASE_URL")  # Try local first
+    # or os.getenv("DATABASE_URL")  # Then production
+    # or f"sqlite:///{DATABASE_PATH}"  # Fallback
 )
 
 
