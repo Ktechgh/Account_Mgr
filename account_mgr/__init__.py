@@ -2,16 +2,17 @@ import os
 import secrets
 import logging
 from flask_babel import Babel
+from dotenv import load_dotenv
 from flask_mailman import Mail
 from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
 from flask_limiter import Limiter
-from flask_migrate import Migrate
 from flask_session import Session
 from .ansi_ import get_color_support
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate, upgrade
 from flask_limiter.util import get_remote_address
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import login_manager, LoginManager, current_user
@@ -19,41 +20,26 @@ from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
 
 
-# Create a Flask application instance
 app = Flask(__name__)
+load_dotenv()
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Use a secure environment variable to store the secret key.
-# You can use the 'secrets' module (available in Python 3.6+) to generate a secret key:
 SECRET_KEY = "flask-insecure-c#y(k55srf&7q^i@mi+f*tw_%ll$^w@#cd1=fwa6&8tr^2qwv1"
 secret_key = secrets.token_urlsafe(20)  # Generate a secure secret key
 
 
-# Define the database path relative to the application directory
 APP_DATABASE = os.path.join(os.path.dirname(__file__), "database")
 DATABASE_PATH = os.path.join(APP_DATABASE, "account_mgr_db.db")
 
 
-# Connecting to local postgress db
-POSTGRES_USER = "postgres"
-POSTGRES_PASSWORD = "12345"
-POSTGRES_DB = "account_mgr_db"
-POSTGRES_HOST = "localhost"
-POSTGRES_PORT = "5432"
-
-
-# Please uncomment if you want to connect your Database to Postgress db.
-# app.config["SQLALCHEMY_DATABASE_URI"] = (
-#     f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"  # Please uncomment if you want to use it.
-# )
-
-# Configure Flask application settings
 app.config["SECRET_KEY"] = SECRET_KEY
-# app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DATABASE_PATH}"
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "postgresql://account_mgr_db_user:lBt8j0VTqLoTQvkLqyXiO9BB9yjdBRF9@dpg-d38ecs0gjchc73cvt5r0-a/account_mgr_db"
+    os.getenv("DATABASE_URL_LOCAL")  # Try local first
+    or os.getenv("DATABASE_URL")  # Then production
+    or f"sqlite:///{DATABASE_PATH}"  # Fallback
 )
+
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["BABEL_DEFAULT_LOCALE"] = "en_US"
 app.config["BABEL_DEFAULT_TIMEZONE"] = "UTC"
@@ -65,7 +51,6 @@ if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgresql"):
     }
 
 
-# Mail config
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 # app.config["MAIL_PORT"] = 587
 app.config["MAIL_PORT"] = 465
@@ -74,7 +59,6 @@ app.config["MAIL_PASSWORD"] = "hwnu ujaf aayq kohj"
 # app.config["MAIL_USE_TLS"] = True
 app.config["MAIL_USE_SSL"] = True
 
-
 # Configure media files for file uploads
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10MB
 app.config["ALLOWED_EXTENSIONS"] = [".jpg", ".jpeg", ".png", ".pdf"]
@@ -82,15 +66,11 @@ app.config["UPLOAD_FOLDER"] = os.path.abspath(
     os.path.join("mini_mart", "static", "media")
 )
 
-
-# Configure Flask-Caching
 app.config["CACHE_TYPE"] = "simple"  # You can use 'simple', 'redis', 'memcached'
 app.config["CACHE_DEFAULT_TIMEOUT"] = (
     300  # Cache timeout in seconds (e.g., 300 seconds = 5 minutes)
 )
 
-
-# Initialize database, babel, cache, CSRF protection, and migration management instances
 mail = Mail()
 mail.init_app(app)
 babel = Babel(app)
@@ -345,3 +325,18 @@ app.register_blueprint(meter_cash_api, url_prefix="/")
 app.register_blueprint(transactions_bp, url_prefix="/")
 app.register_blueprint(super_admin_secure, url_prefix="/")
 app.register_blueprint(attendants_registration, url_prefix="/")
+
+
+from flask import current_app
+
+
+@app.before_request
+def apply_database_migrations():
+    """Run Alembic migrations automatically (only in development)."""
+    if current_app.config.get("ENV") == "development":
+        try:
+            upgrade()
+            print("✅ Database migrations applied successfully.")
+        except Exception as e:
+            app.logger.exception("Database migration failed: %s", e)
+            print(f"⚠️ Database migration skipped or failed: {e}")

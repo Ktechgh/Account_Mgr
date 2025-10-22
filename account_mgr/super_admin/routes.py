@@ -48,7 +48,7 @@ super_admin_secure = Blueprint(
     static_folder="static",
 )
 
-load_dotenv(dotenv_path="account_mgr/config/.env")
+load_dotenv()
 admin_username = os.getenv("ADMIN_USERNAME")
 admin_password = os.getenv("ADMIN_PASSWORD")
 
