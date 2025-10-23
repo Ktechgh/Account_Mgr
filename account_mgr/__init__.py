@@ -33,9 +33,9 @@ DATABASE_PATH = os.path.join(APP_DATABASE, "account_mgr_db.db")
 
 
 app.config["SECRET_KEY"] = SECRET_KEY
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    os.environ.get("DATABASE_URL")  # Then production
-)
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://testing_ssqn_user:vqoJ4wvG0lkWJ0UxBroxCGhJP4fE0CWX@dpg-d3sru3ndiees73cqabo0-a/testing_ssqn"
+#     os.environ.get("DATABASE_URL")  # Then production
+# )
 
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
