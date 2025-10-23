@@ -33,9 +33,9 @@ DATABASE_PATH = os.path.join(APP_DATABASE, "account_mgr_db.db")
 
 
 app.config["SECRET_KEY"] = SECRET_KEY
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://testing_ssqn_user:vqoJ4wvG0lkWJ0UxBroxCGhJP4fE0CWX@dpg-d3sru3ndiees73cqabo0-a/testing_ssqn"
-#     os.environ.get("DATABASE_URL")  # Then production
-# )
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    os.environ.get("DATABASE_URL")  # Then production
+)
 
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -338,20 +338,3 @@ app.register_blueprint(attendants_registration, url_prefix="/")
 #         except Exception as e:
 #             app.logger.exception("Database migration failed: %s", e)
 #             print(f"⚠️ Database migration skipped or failed: {e}")
-
-
-# from . import db
-from .super_admin.routes import seed_super_admin
-# from . import flask_db_init
-
-
-def init_db():
-    """Ensure all tables exist and seed initial data."""
-    with app.app_context():
-        db.create_all()
-        flask_db_init()
-        seed_super_admin()
-
-
-# Call it at startup
-init_db()
