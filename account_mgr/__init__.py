@@ -338,3 +338,20 @@ app.register_blueprint(attendants_registration, url_prefix="/")
 #         except Exception as e:
 #             app.logger.exception("Database migration failed: %s", e)
 #             print(f"⚠️ Database migration skipped or failed: {e}")
+
+
+# from . import db
+from .super_admin.routes import seed_super_admin
+# from . import flask_db_init
+
+
+def init_db():
+    """Ensure all tables exist and seed initial data."""
+    with app.app_context():
+        db.create_all()
+        flask_db_init()
+        seed_super_admin()
+
+
+# Call it at startup
+init_db()
