@@ -66,49 +66,37 @@ def super_admin_required(f):
 
 
 def seed_super_admin():
-    inspector = inspect(db.engine)
-    if (
-        "users" not in inspector.get_table_names()
-        or "tenants" not in inspector.get_table_names()
-    ):
-        logging.warning(
-            msg="Required tables do not exist. Skipping super admin seeding."
-        )
-        return
-
-    # Step 1: Ensure a tenant exists
-    tenant = Tenant.query.first()
-    if not tenant:
-        tenant = Tenant(
-            business_name="Esvid Mart",
-            shop_code="0000",
-            email="esvid@gmail.com",
-            phone="0200000000",
-            address="Default Address",
-        )
-        db.session.add(tenant)
-        db.session.commit()
-        logging.info(msg="✅ Default tenant created.")
-
-    # Step 2: Check for existing super admin
-    existing_admin = User.query.filter(
-        (User.email == "admin@example.com")
-        | (User.staff_id == "admin0001")
-        | (User.username == admin_username)
-    ).first()
-
-    if existing_admin:
-        logging.info(msg="Super admin already exists. Skipping creation.")
-        return
-
-    # Step 3: Seed super admin with tenant
+    """Seed the default tenant and super admin if they do not exist."""
     try:
+        # Step 1: Ensure a tenant exists
+        tenant = Tenant.query.first()
+        if not tenant:
+            tenant = Tenant(
+                business_name="Esvid Mart",
+                shop_code="0000",
+                email="esvid@gmail.com",
+                phone="0200000000",
+                address="Default Address",
+            )
+            db.session.add(tenant)
+            db.session.commit()
+            logging.info("✅ Default tenant created.")
+
+        # Step 2: Ensure super admin exists
+        existing_admin = User.query.filter(
+            (User.email == "admin@example.com")
+            | (User.staff_id == "admin0001")
+            | (User.username == admin_username)
+        ).first()
+
+        if existing_admin:
+            logging.info("ℹ️ Super admin already exists. Skipping creation.")
+            return
+
         admin = User(
             username=admin_username,
             staff_id="admin0001",
-            password=bcrypt.generate_password_hash(admin_password).decode(
-                encoding="utf-8"
-            ),
+            password=bcrypt.generate_password_hash(admin_password).decode("utf-8"),
             user_role="SuperUser",
             email="admin@example.com",
             user_profile="default.jpg",
@@ -117,10 +105,11 @@ def seed_super_admin():
         )
         db.session.add(admin)
         db.session.commit()
-        logging.info(msg="✅ Super admin seeded successfully.")
+        logging.info("✅ Super admin seeded successfully.")
+
     except Exception as e:
         db.session.rollback()
-        logging.error(msg=f"❌ Error seeding super admin: {e}")
+        logging.error(f"❌ Error seeding super admin: {e}")
 
 
 @super_admin_secure.route(rule="/", methods=["GET", "POST"])
@@ -902,6 +891,15 @@ def edit_session(session_id):
         coins_form=coins_form,
         section_form=section_form,
         denom_section_form=denom_section_form,
+    )
+
+
+@super_admin_secure.route("/firebase-messaging-sw.js")
+def firebase_messaging_sw():
+    return (
+        "/* Firebase service worker placeholder */",
+        200,
+        {"Content-Type": "application/javascript"},
     )
 
 

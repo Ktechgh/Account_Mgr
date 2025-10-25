@@ -1,83 +1,50 @@
 import os
-import secrets
 import logging
 from flask_babel import Babel
 from dotenv import load_dotenv
 from flask_mailman import Mail
-from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
 from flask_limiter import Limiter
-from flask_session import Session
+from flask_migrate import Migrate
 from .ansi_ import get_color_support
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from config import DevConfig, ProdConfig
 from flask_limiter.util import get_remote_address
+from flask_session import Session as FlaskSession
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import login_manager, LoginManager, current_user
 from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
+# ---------
+from alembic.config import Config
+from sqlalchemy import inspect
+from alembic.script import ScriptDirectory
+from alembic.runtime.environment import EnvironmentContext
 
 
-app = Flask(__name__)
 load_dotenv()
+app = Flask(__name__)
 
 
-SECRET_KEY = "flask-insecure-c#y(k55srf&7q^i@mi+f*tw_%ll$^w@#cd1=fwa6&8tr^2qwv1"
-secret_key = secrets.token_urlsafe(20)  # Generate a secure secret key
+if os.getenv("FLASK_ENV") == "production":
+    app.config.from_object(ProdConfig)
+else:
+    app.config.from_object(DevConfig)
 
 
-APP_DATABASE = os.path.join(os.path.dirname(__file__), "database")
-DATABASE_PATH = os.path.join(APP_DATABASE, "account_mgr_db.db")
-
-
-app.config["SECRET_KEY"] = SECRET_KEY
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    os.environ.get("DATABASE_URL")  # Then production
-)
-
-
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["BABEL_DEFAULT_LOCALE"] = "en_US"
-app.config["BABEL_DEFAULT_TIMEZONE"] = "UTC"
-# app.config["BABEL_DEFAULT_TIMEZONE"] = "Africa/Accra"
-
-if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgresql"):
-    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-        "connect_args": {"options": "-c timezone=Africa/Accra"}
-    }
-
-
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-# app.config["MAIL_PORT"] = 587
-app.config["MAIL_PORT"] = 465
-app.config["MAIL_USERNAME"] = "kennartecht@gmail.com"
-app.config["MAIL_PASSWORD"] = "hwnu ujaf aayq kohj"
-# app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USE_SSL"] = True
-
-# Configure media files for file uploads
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10MB
-app.config["ALLOWED_EXTENSIONS"] = [".jpg", ".jpeg", ".png", ".pdf"]
-app.config["UPLOAD_FOLDER"] = os.path.abspath(
-    os.path.join("mini_mart", "static", "media")
-)
-
-app.config["CACHE_TYPE"] = "simple"  # You can use 'simple', 'redis', 'memcached'
-app.config["CACHE_DEFAULT_TIMEOUT"] = (
-    300  # Cache timeout in seconds (e.g., 300 seconds = 5 minutes)
-)
-
-mail = Mail()
-mail.init_app(app)
+mail = Mail(app)
 babel = Babel(app)
 cache = Cache(app)
-cache.init_app(app)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-csrf = CSRFProtect(app)  # Protect against Cross-Site Request Forgery (CSRF) attacks
-migrate = Migrate(app, db)  # Database migration with Flask-Migrate
+csrf = CSRFProtect(app)
+migrate = Migrate(app, db)
+
+
+app.config["SESSION_SQLALCHEMY"] = db
+flask_session = FlaskSession(app)
 
 
 login_manager = LoginManager()
@@ -85,46 +52,7 @@ login_manager.init_app(app)
 login_manager.login_message_category = "super_admin_secure.secure_superlogin"
 
 
-@login_manager.unauthorized_handler
-def unauthorized_callback():
-    path = request.path
-
-    # Check if trying to access super admin protected routes
-    if path.startswith("/super-admin/adashboard/page") or path.startswith(
-        "/super-admin/login/page"
-    ):
-        flash(message="Please log in as Admin to access this page", category="success")
-
-    return redirect(url_for(endpoint="super_admin_secure.secure_superlogin"))
-
-
-# Session configuration
-app.config["SESSION_TYPE"] = "sqlalchemy"  # Use SQLAlchemy backend
-# app.config["SESSION_TYPE"] = "filesystem"  # Use SQLAlchemy backend
-app.config["SESSION_SQLALCHEMY"] = db  # Reference SQLAlchemy instance
-app.config["SESSION_SQLALCHEMY_TABLE"] = "sessions"  # Use the Session model
-app.config["SESSION_PERMANENT"] = True  # Set to True for persistent sessions
-app.config["SESSION_USE_SIGNER"] = True
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=4)
-# app.config["SESSION_COOKIE_SAMESITE"] = 'None' Enable this config when using https:
-# app.config["WTF_CSRF_TIME_LIMIT"] = 43200  # 12 hours
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SECURE"] = False
-Session(app)  # Initialize Flask-Session extension
-
-
-# Set up logging configuration
 logging.basicConfig(level=logging.DEBUG)
-
-""" Flask-Limiter Configuration:"""
-limiter = Limiter(
-    app=app,
-    headers_enabled=True,
-    storage_uri="memory://",
-    key_func=get_remote_address,
-    default_limits=["3000 per hour"],
-)
-
 colors = get_color_support()
 
 
@@ -195,7 +123,6 @@ def security_headers(response):
         "script-src-attr 'none'; "
         "report-uri /csp-violation-report-endpoint/; "
         "report-to csp-endpoint; "
-        
         # ✅ Scripts
         "script-src 'self' "
         "https://cdn.jsdelivr.net "
@@ -203,19 +130,15 @@ def security_headers(response):
         "https://unpkg.com "
         "https://accounts.google.com "
         "https://apis.google.com; "
-
         # ✅ Styles
         "style-src 'self' "
         "https://cdn.jsdelivr.net "
         "https://cdnjs.cloudflare.com; "
-
         # ✅ Fonts
         "font-src 'self' "
         "https://cdnjs.cloudflare.com; "
-
         # ✅ Images
         "img-src 'self' blob: data:; "
-
         # ✅ Connections (XHR, fetch, WebSockets, APIs)
         "connect-src 'self' "
         "https://cdn.jsdelivr.net "
@@ -250,17 +173,32 @@ def security_headers(response):
     return response
 
 
+limiter = Limiter(
+    app=app,
+    headers_enabled=True,
+    storage_uri="memory://",
+    key_func=get_remote_address,
+    default_limits=["3000 per hour"],
+)
+
+
 @app.teardown_request
 def shutdown_session(exception=None):
     """Teardown function to remove the database session after each request."""
     db.session.remove()
 
 
-def flask_db_init():
-    """Function to initialize Flask-Migrate and create the migrations folder."""
-    migrations_folder = os.path.join(os.getcwd(), "migrations")
-    if not os.path.exists(path=migrations_folder):
-        os.system(command="flask db init")
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    path = request.path
+
+    # Check if trying to access super admin protected routes
+    if path.startswith("/super-admin/adashboard/page") or path.startswith(
+        "/super-admin/login/page"
+    ):
+        flash(message="Please log in as Admin to access this page", category="success")
+
+    return redirect(url_for(endpoint="super_admin_secure.secure_superlogin"))
 
 
 @app.context_processor
@@ -325,16 +263,113 @@ app.register_blueprint(super_admin_secure, url_prefix="/")
 app.register_blueprint(attendants_registration, url_prefix="/")
 
 
-# from flask import current_app
+from .super_admin.routes import seed_super_admin
 
+# def init_db():
+#     """Automatically detect and apply new migrations on startup."""
+#     from flask_migrate import upgrade, migrate, init as alembic_init
+#     import alembic
 
-# @app.before_request
-# def apply_database_migrations():
-#     """Run Alembic migrations automatically (only in development)."""
-#     if current_app.config.get("ENV") == "development":
+#     with app.app_context():
 #         try:
+#             migrations_folder = os.path.join(os.getcwd(), "migrations")
+
+#             # 1️⃣ Initialize Alembic folder if missing
+#             if not os.path.exists(migrations_folder):
+#                 alembic_init()
+#                 logging.info("✅ Alembic migrations folder created.")
+
+#             # 2️⃣ Run automatic migration generation (like 'flask db migrate')
+#             migrate(message="Auto-migrate (Render deploy)")
+#             logging.info("✅ Migration scripts generated successfully.")
+
+#             # 3️⃣ Apply migrations (like 'flask db upgrade')
 #             upgrade()
-#             print("✅ Database migrations applied successfully.")
+#             logging.info("✅ Database upgraded to latest revision.")
+
+#             # 4️⃣ Fallback: ensure all models exist
+#             db.create_all()
+
+#             # 5️⃣ Optional: seed default data
+#             seed_super_admin()
+#             logging.info("✅ Database initialized and seeded successfully.")
+
+#         except alembic.util.exc.CommandError as e:
+#             # Happens if there are no model changes to migrate
+#             logging.info(f"ℹ️ No new migrations to apply: {e}")
 #         except Exception as e:
-#             app.logger.exception("Database migration failed: %s", e)
-#             print(f"⚠️ Database migration skipped or failed: {e}")
+#             logging.error(f"❌ init_db() failed: {e}")
+
+
+def has_schema_changes(alembic_cfg):
+    """Check if there are pending schema changes (True = needs migrate)."""
+    try:
+        script = ScriptDirectory.from_config(alembic_cfg)
+
+        def run_migrations(rev, context):
+            diff = context.get_current_revision() != script.get_current_head()
+            return diff
+
+        with EnvironmentContext(alembic_cfg, script, fn=run_migrations):
+            return run_migrations(None, None)
+    except Exception:
+        # If anything goes wrong, assume we need migration (safe fallback)
+        return True
+
+
+def auto_migrate():
+    """Automatically handle migration and upgrade (for Render auto-deploy)."""
+    try:
+        migrations_dir = os.path.join(os.getcwd(), "migrations")
+
+        # 1️⃣ Initialize migrations if folder doesn't exist
+        if not os.path.exists(migrations_dir):
+            os.system("flask db init")
+            logging.info("✅ Flask-Migrate initialized (migrations folder created).")
+
+        # 2️⃣ Prepare Alembic config for direct inspection
+        alembic_cfg_path = os.path.join(migrations_dir, "alembic.ini")
+        if not os.path.exists(alembic_cfg_path):
+            logging.warning("⚠️ Alembic config missing, skipping diff check.")
+            needs_migrate = True
+        else:
+            alembic_cfg = Config(alembic_cfg_path)
+            needs_migrate = has_schema_changes(alembic_cfg)
+
+        # 3️⃣ Run migrate + upgrade only if needed
+        if needs_migrate:
+            logging.info("🚀 Schema changes detected — applying migrations...")
+            os.system('flask db migrate -m "Auto-migrate (Render)"')
+            os.system("flask db upgrade")
+            logging.info("✅ Database auto-migrated successfully.")
+        else:
+            logging.info("✅ No schema changes detected — skipping migration.")
+
+    except Exception as e:
+        logging.error(f"❌ Auto migration failed: {e}")
+
+
+def init_db():
+    """Initialize database, apply migrations if available, and seed data once."""
+    with app.app_context():
+        try:
+            # --- 1️⃣ Auto-migrate on Render (if enabled) ---
+            if os.getenv("AUTO_MIGRATE", "1") == "1":
+                auto_migrate()
+
+            # --- 2️⃣ Check if database tables exist ---
+            inspector = inspect(db.engine)
+            tables = inspector.get_table_names()
+
+            if "users" not in tables or "tenants" not in tables:
+                db.create_all()
+                logging.info("✅ Tables created successfully.")
+            else:
+                logging.info("ℹ️ Tables already exist. Skipping create_all().")
+
+            # --- 3️⃣ Always ensure default data is seeded ---
+            seed_super_admin()
+            logging.info("✅ Database seeded successfully (checked or created admin).")
+
+        except Exception as e:
+            logging.error(f"❌ init_db() failed: {e}")
