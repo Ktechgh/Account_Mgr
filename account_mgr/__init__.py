@@ -265,41 +265,6 @@ app.register_blueprint(attendants_registration, url_prefix="/")
 
 from .super_admin.routes import seed_super_admin
 
-# def init_db():
-#     """Automatically detect and apply new migrations on startup."""
-#     from flask_migrate import upgrade, migrate, init as alembic_init
-#     import alembic
-
-#     with app.app_context():
-#         try:
-#             migrations_folder = os.path.join(os.getcwd(), "migrations")
-
-#             # 1️⃣ Initialize Alembic folder if missing
-#             if not os.path.exists(migrations_folder):
-#                 alembic_init()
-#                 logging.info("✅ Alembic migrations folder created.")
-
-#             # 2️⃣ Run automatic migration generation (like 'flask db migrate')
-#             migrate(message="Auto-migrate (Render deploy)")
-#             logging.info("✅ Migration scripts generated successfully.")
-
-#             # 3️⃣ Apply migrations (like 'flask db upgrade')
-#             upgrade()
-#             logging.info("✅ Database upgraded to latest revision.")
-
-#             # 4️⃣ Fallback: ensure all models exist
-#             db.create_all()
-
-#             # 5️⃣ Optional: seed default data
-#             seed_super_admin()
-#             logging.info("✅ Database initialized and seeded successfully.")
-
-#         except alembic.util.exc.CommandError as e:
-#             # Happens if there are no model changes to migrate
-#             logging.info(f"ℹ️ No new migrations to apply: {e}")
-#         except Exception as e:
-#             logging.error(f"❌ init_db() failed: {e}")
-
 
 def has_schema_changes(alembic_cfg):
     """Check if there are pending schema changes (True = needs migrate)."""
@@ -322,21 +287,21 @@ def auto_migrate():
     try:
         migrations_dir = os.path.join(os.getcwd(), "migrations")
 
-        # 1️⃣ Initialize migrations if folder doesn't exist
+        # 1️Initialize migrations if folder doesn't exist
         if not os.path.exists(migrations_dir):
             os.system("flask db init")
-            logging.info("✅ Flask-Migrate initialized (migrations folder created).")
+            logging.info("Flask-Migrate initialized (migrations folder created).")
 
-        # 2️⃣ Prepare Alembic config for direct inspection
+        # 2️Prepare Alembic config for direct inspection
         alembic_cfg_path = os.path.join(migrations_dir, "alembic.ini")
         if not os.path.exists(alembic_cfg_path):
-            logging.warning("⚠️ Alembic config missing, skipping diff check.")
+            logging.warning("Alembic config missing, skipping diff check.")
             needs_migrate = True
         else:
             alembic_cfg = Config(alembic_cfg_path)
             needs_migrate = has_schema_changes(alembic_cfg)
 
-        # 3️⃣ Run migrate + upgrade only if needed
+        # 3️Run migrate + upgrade only if needed
         if needs_migrate:
             logging.info("🚀 Schema changes detected — applying migrations...")
             os.system('flask db migrate -m "Auto-migrate (Render)"')
@@ -353,23 +318,23 @@ def init_db():
     """Initialize database, apply migrations if available, and seed data once."""
     with app.app_context():
         try:
-            # --- 1️⃣ Auto-migrate on Render (if enabled) ---
+            # --- 1️Auto-migrate on Render (if enabled) ---
             if os.getenv("AUTO_MIGRATE", "1") == "1":
                 auto_migrate()
 
-            # --- 2️⃣ Check if database tables exist ---
+            # --- 2️Check if database tables exist ---
             inspector = inspect(db.engine)
             tables = inspector.get_table_names()
 
             if "users" not in tables or "tenants" not in tables:
                 db.create_all()
-                logging.info("✅ Tables created successfully.")
+                logging.info("Tables created successfully.")
             else:
-                logging.info("ℹ️ Tables already exist. Skipping create_all().")
+                logging.info("Tables already exist. Skipping create_all().")
 
-            # --- 3️⃣ Always ensure default data is seeded ---
+            # --- 3️Always ensure default data is seeded ---
             seed_super_admin()
-            logging.info("✅ Database seeded successfully (checked or created admin).")
+            logging.info("Database seeded successfully (checked or created admin).")
 
         except Exception as e:
             logging.error(f"❌ init_db() failed: {e}")
