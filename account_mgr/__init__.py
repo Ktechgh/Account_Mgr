@@ -2,25 +2,25 @@ import os
 import logging
 from flask_babel import Babel
 from dotenv import load_dotenv
+from sqlalchemy import inspect
 from flask_mailman import Mail
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
+from alembic.config import Config
 from flask_limiter import Limiter
 from flask_migrate import Migrate
 from .ansi_ import get_color_support
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
-from config import ProdConfig
+from config import DevConfig, ProdConfig
+from alembic.script import ScriptDirectory
 from flask_limiter.util import get_remote_address
 from flask_session import Session as FlaskSession
 from werkzeug.exceptions import RequestEntityTooLarge
+from alembic.runtime.environment import EnvironmentContext
 from flask_login import login_manager, LoginManager, current_user
 from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
-from alembic.config import Config
-from sqlalchemy import inspect
-from alembic.script import ScriptDirectory
-from alembic.runtime.environment import EnvironmentContext
 
 
 load_dotenv()
@@ -29,8 +29,8 @@ app = Flask(__name__)
 
 if os.getenv("FLASK_ENV") == "production":
     app.config.from_object(ProdConfig)
-# else:
-#     app.config.from_object(DevConfig)
+else:
+    app.config.from_object(DevConfig)
 
 
 mail = Mail(app)
@@ -41,14 +41,12 @@ bcrypt = Bcrypt(app)
 csrf = CSRFProtect(app)
 migrate = Migrate(app, db)
 
-
-app.config["SESSION_SQLALCHEMY"] = db
-flask_session = FlaskSession(app)
-
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_message_category = "super_admin_secure.secure_superlogin"
+
+app.config["SESSION_SQLALCHEMY"] = db
+flask_session = FlaskSession(app)
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -337,6 +335,3 @@ def init_db():
 
         except Exception as e:
             logging.error(f"❌ init_db() failed: {e}")
-
-
-

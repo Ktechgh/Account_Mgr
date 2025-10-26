@@ -80,13 +80,24 @@ class Config:
     WTF_CSRF_TIME_LIMIT = 43200  # 12 hours
 
 
-# class DevConfig(Config):
-#     """Development configuration."""
+class DevConfig(Config):
+    """Development configuration."""
 
-#     FLASK_ENV = "development"
-#     DEBUG = True
-#     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_LOCAL") or os.getenv(
-#         "DATABASE_URL"
+    FLASK_ENV = "development"
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_LOCAL")
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "connect_args": {"options": "-c timezone=Africa/Accra"}
+    }
+
+
+# class ProdConfig(Config):
+#     """Production configuration."""
+
+#     FLASK_ENV = "production"
+#     DEBUG = False
+#     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or os.getenv(
+#         "DATABASE_URL_INTERNAL"
 #     )
 #     SQLALCHEMY_ENGINE_OPTIONS = {
 #         "connect_args": {"options": "-c timezone=Africa/Accra"}
@@ -98,10 +109,11 @@ class ProdConfig(Config):
 
     FLASK_ENV = "production"
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or os.getenv(
-        "DATABASE_URL_INTERNAL"
+    SQLALCHEMY_DATABASE_URI = (
+        os.getenv("DATABASE_URL")
+        or os.getenv("DATABASE_URL_INTERNAL")
+        or os.getenv("DATABASE_URL_LOCAL")
     )
-
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {"options": "-c timezone=Africa/Accra"}
     }
