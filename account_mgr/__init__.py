@@ -37,7 +37,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 csrf = CSRFProtect(app)
 migrate = Migrate(app, db)
-Session(app)
+
 
 app.config["SESSION_SQLALCHEMY"] = db
 flask_session = FlaskSession(app)

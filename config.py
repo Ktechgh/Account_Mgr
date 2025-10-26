@@ -115,7 +115,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # --- Database ---
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or os.getenv(
+        "DATABASE_URL_INTERNAL"
+    )
+
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {"options": "-c timezone=Africa/Accra"}
     }
