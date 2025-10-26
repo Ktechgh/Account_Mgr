@@ -83,7 +83,7 @@ class Config:
 class DevConfig(Config):
     """Development configuration."""
 
-    ENV = "development"
+    FLASK_ENV = "development"
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_LOCAL") or os.getenv(
         "DATABASE_URL"
@@ -96,17 +96,9 @@ class DevConfig(Config):
 class ProdConfig(Config):
     """Production configuration."""
 
-    ENV = "production"
+    FLASK_ENV = "production"
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {"options": "-c timezone=Africa/Accra"}
     }
-
-
-class TestConfig(Config):
-    """Testing configuration."""
-
-    ENV = "testing"
-    TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///test.db"
