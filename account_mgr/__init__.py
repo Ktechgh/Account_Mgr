@@ -28,10 +28,19 @@ load_dotenv()
 app = Flask(__name__)
 
 
-if os.getenv("FLASK_ENV") == "production":
+# if os.getenv("FLASK_ENV") == "production":
+#     app.config.from_object(ProdConfig)
+# else:
+#     app.config.from_object(DevConfig)
+
+
+env = os.getenv("RENDER", "0")  # Detect Render auto env var
+if env == "1" or os.getenv("FLASK_ENV") == "production":
     app.config.from_object(ProdConfig)
+    print("🚀 Loaded Production Config (Render)")
 else:
     app.config.from_object(DevConfig)
+    print("🧩 Loaded Development Config (Local)")
 
 
 mail = Mail(app)
