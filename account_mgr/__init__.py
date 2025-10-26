@@ -17,7 +17,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import login_manager, LoginManager, current_user
 from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
-# ---------
+from config import ProdConfig
 from alembic.config import Config
 from sqlalchemy import inspect
 from alembic.script import ScriptDirectory
