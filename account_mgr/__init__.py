@@ -10,14 +10,13 @@ from flask_migrate import Migrate
 from .ansi_ import get_color_support
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
-from config import DevConfig, ProdConfig
+from config import ProdConfig
 from flask_limiter.util import get_remote_address
 from flask_session import Session as FlaskSession
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import login_manager, LoginManager, current_user
 from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
-from config import ProdConfig
 from alembic.config import Config
 from sqlalchemy import inspect
 from alembic.script import ScriptDirectory
@@ -30,8 +29,8 @@ app = Flask(__name__)
 
 if os.getenv("FLASK_ENV") == "production":
     app.config.from_object(ProdConfig)
-else:
-    app.config.from_object(DevConfig)
+# else:
+#     app.config.from_object(DevConfig)
 
 
 mail = Mail(app)
