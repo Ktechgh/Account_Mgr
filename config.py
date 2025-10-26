@@ -45,6 +45,69 @@ load_dotenv()
 #     SESSION_KEY_PREFIX = "session:"
 
 
+# class Config:
+#     """Base configuration shared by all environments."""
+
+#     # --- Security ---
+#     SECRET_KEY = os.getenv("SECRET_KEY", "default-secret-key")
+#     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+#     # --- Mail ---
+#     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+#     MAIL_PORT = int(os.getenv("MAIL_PORT", 465))
+#     MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
+#     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
+#     MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", "True").lower() == "true"
+
+#     # --- File Uploads ---
+#     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
+#     ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".pdf"]
+#     UPLOAD_FOLDER = os.path.abspath(os.path.join("account_mgr", "static", "media"))
+
+#     # --- Cache ----
+#     CACHE_TYPE = "simple"
+#     CACHE_DEFAULT_TIMEOUT = 300  # 5 minutes
+
+#     # --- Flask-Session ---
+#     SESSION_TYPE = "sqlalchemy"  # store sessions in DB
+#     SESSION_PERMANENT = True
+#     SESSION_USE_SIGNER = True
+#     SESSION_SQLALCHEMY_TABLE = "sessions"
+#     SESSION_COOKIE_HTTPONLY = True
+#     SESSION_COOKIE_SECURE = False  # set True when on HTTPS
+#     SESSION_COOKIE_SAMESITE = "Lax"
+#     PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 4  # 4 days
+#     WTF_CSRF_TIME_LIMIT = 43200  # 12 hours
+
+
+# class DevConfig(Config):
+#     """Development configuration."""
+
+#     FLASK_ENV = "development"
+#     DEBUG = True
+#     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_LOCAL") or os.getenv(
+#         "DATABASE_URL"
+#     )
+#     SQLALCHEMY_ENGINE_OPTIONS = {
+#         "connect_args": {"options": "-c timezone=Africa/Accra"}
+#     }
+
+
+# class ProdConfig(Config):
+#     """Production configuration."""
+
+#     FLASK_ENV = "production"
+#     DEBUG = False
+#     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+#     SQLALCHEMY_ENGINE_OPTIONS = {
+#         "connect_args": {"options": "-c timezone=Africa/Accra"}
+#     }
+
+
+import os
+import re
+
+
 class Config:
     """Base configuration shared by all environments."""
 
@@ -74,10 +137,17 @@ class Config:
     SESSION_USE_SIGNER = True
     SESSION_SQLALCHEMY_TABLE = "sessions"
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = False  # set True when on HTTPS
+    SESSION_COOKIE_SECURE = os.getenv("FLASK_ENV") == "production"
     SESSION_COOKIE_SAMESITE = "Lax"
     PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 4  # 4 days
     WTF_CSRF_TIME_LIMIT = 43200  # 12 hours
+
+    @staticmethod
+    def fix_render_database_url(url: str) -> str:
+        """Render sometimes provides postgres:// — fix it to postgresql://."""
+        if url and url.startswith("postgres://"):
+            return re.sub(r"^postgres://", "postgresql://", url)
+        return url
 
 
 class DevConfig(Config):
@@ -85,8 +155,8 @@ class DevConfig(Config):
 
     FLASK_ENV = "development"
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_LOCAL") or os.getenv(
-        "DATABASE_URL"
+    SQLALCHEMY_DATABASE_URI = Config.fix_render_database_url(
+        os.getenv("DATABASE_URL_LOCAL") or os.getenv("DATABASE_URL")
     )
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {"options": "-c timezone=Africa/Accra"}
@@ -98,7 +168,7 @@ class ProdConfig(Config):
 
     FLASK_ENV = "production"
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = Config.fix_render_database_url(os.getenv("DATABASE_URL"))
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {"options": "-c timezone=Africa/Accra"}
     }
