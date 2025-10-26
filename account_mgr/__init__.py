@@ -17,7 +17,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import login_manager, LoginManager, current_user
 from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
-# ---------
+from flask_session import Session
 from alembic.config import Config
 from sqlalchemy import inspect
 from alembic.script import ScriptDirectory
@@ -37,7 +37,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 csrf = CSRFProtect(app)
 migrate = Migrate(app, db)
-
+Session(app)
 
 app.config["SESSION_SQLALCHEMY"] = db
 flask_session = FlaskSession(app)
