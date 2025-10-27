@@ -423,10 +423,9 @@ def init_db():
             logging.error(f"❌ init_db() failed: {e}")
 
 
-# --- ✅ Run init_db() automatically when app loads (for Render) ---
+
 import sys
 
-# --- ✅ Run init_db() automatically when app loads (for Render) ---
 if os.getenv("AUTO_MIGRATE", "1") == "1" and not any(
     cmd in sys.argv for cmd in ["db", "shell"]
 ):
