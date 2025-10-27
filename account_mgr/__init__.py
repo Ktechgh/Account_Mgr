@@ -2,22 +2,23 @@ import os
 import logging
 from flask_babel import Babel
 from dotenv import load_dotenv
-from sqlalchemy import inspect
+# from sqlalchemy import inspect
 from flask_mailman import Mail
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
-from alembic.config import Config
+# from alembic.config import Config
 from flask_limiter import Limiter
 from flask_migrate import Migrate
 from .ansi_ import get_color_support
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
-from config import DevConfig, ProdConfig
-from alembic.script import ScriptDirectory
+from config import ProdConfig
+# from config import DevConfig, ProdConfig
+# from alembic.script import ScriptDirectory
 from flask_limiter.util import get_remote_address
 from flask_session import Session as FlaskSession
 from werkzeug.exceptions import RequestEntityTooLarge
-from alembic.runtime.environment import EnvironmentContext
+# from alembic.runtime.environment import EnvironmentContext
 from flask_login import login_manager, LoginManager, current_user
 from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
@@ -30,7 +31,7 @@ app = Flask(__name__)
 if os.getenv("FLASK_ENV") == "production":
     app.config.from_object(ProdConfig)
 else:
-    app.config.from_object(DevConfig)
+    pass
 
 
 mail = Mail(app)

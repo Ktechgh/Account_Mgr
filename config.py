@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
+from account_mgr import app
 
 
 # class Config:
@@ -80,15 +81,15 @@ class Config:
     WTF_CSRF_TIME_LIMIT = 43200  # 12 hours
 
 
-class DevConfig(Config):
-    """Development configuration."""
+# class DevConfig(Config):
+#     """Development configuration."""
 
-    FLASK_ENV = "development"
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_LOCAL")
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "connect_args": {"options": "-c timezone=Africa/Accra"}
-    }
+#     FLASK_ENV = "development"
+#     DEBUG = True
+#     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_LOCAL")
+#     SQLALCHEMY_ENGINE_OPTIONS = {
+#         "connect_args": {"options": "-c timezone=Africa/Accra"}
+#     }
 
 
 # class ProdConfig(Config):
@@ -109,11 +110,9 @@ class ProdConfig(Config):
 
     FLASK_ENV = "production"
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = (
-        os.getenv("DATABASE_URL")
-        or os.getenv("DATABASE_URL_INTERNAL")
-        or os.getenv("DATABASE_URL_LOCAL")
-    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://daily_acct_mgr_kezn_user:TikRM3SSBkVsiatqhEX0HWJ7FrDMCZAp@dpg-d3v7ng7diees73epn2k0-a/daily_acct_mgr_kezn"
+
+    
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {"options": "-c timezone=Africa/Accra"}
     }
