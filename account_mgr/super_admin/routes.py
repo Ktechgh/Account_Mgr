@@ -67,7 +67,7 @@ def super_admin_required(f):
 
 def seed_super_admin():
     """Seed the default tenant and super admin if they do not exist."""
-    try:
+    try: 
         # Step 1: Ensure a tenant exists
         tenant = Tenant.query.first()
         if not tenant:

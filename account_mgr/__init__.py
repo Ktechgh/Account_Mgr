@@ -336,17 +336,8 @@ from .super_admin.routes import seed_super_admin
 #         except Exception as e:
 #             logging.error(f"❌ init_db() failed: {e}")
 
+
 # ==========================================================
-
-from sqlalchemy import inspect
-import os, logging
-from alembic.config import Config
-from alembic.script import ScriptDirectory
-from alembic.runtime.environment import EnvironmentContext
-
-# --- AUTO MIGRATION + DB INIT FIXES ---
-
-
 def has_schema_changes(alembic_cfg):
     """Check if there are pending schema changes (True = needs migrate)."""
     try:
@@ -421,7 +412,6 @@ def init_db():
 
         except Exception as e:
             logging.error(f"❌ init_db() failed: {e}")
-
 
 
 import sys
