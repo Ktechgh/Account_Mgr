@@ -74,7 +74,7 @@ class Config:
     SESSION_USE_SIGNER = True
     SESSION_SQLALCHEMY_TABLE = "sessions"
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = False  # set True when on HTTPS
+    SESSION_COOKIE_SECURE = True  # set True when on HTTPS
     SESSION_COOKIE_SAMESITE = "Lax"
     PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 4  # 4 days
     WTF_CSRF_TIME_LIMIT = 43200  # 12 hours

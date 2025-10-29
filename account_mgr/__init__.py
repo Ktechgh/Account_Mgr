@@ -1,9 +1,11 @@
 import os
 import logging
+
 from flask_babel import Babel
 from dotenv import load_dotenv
 from sqlalchemy import inspect
 from flask_mailman import Mail
+from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
 from alembic.config import Config
@@ -41,12 +43,20 @@ bcrypt = Bcrypt(app)
 csrf = CSRFProtect(app)
 migrate = Migrate(app, db)
 
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_message_category = "super_admin_secure.secure_superlogin"
 
+
 app.config["SESSION_SQLALCHEMY"] = db
 flask_session = FlaskSession(app)
+
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=4)
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -355,7 +365,7 @@ def auto_migrate():
 
 def init_db():
     """Initialize database, apply migrations if available, and seed data once."""
-    from .super_admin.routes import seed_super_admin  
+    from .super_admin.routes import seed_super_admin
 
     with app.app_context():
         try:
