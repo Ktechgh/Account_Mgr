@@ -204,7 +204,7 @@ h2 {
   border-color: #0d6efd;
 }
 
-.progressbar li.active + li:after {
+.progressbar li.active+li:after {
   background: #0d6efd;
 }
 
@@ -218,3 +218,41 @@ h2 {
   }
 }
 
+/* Override Bootstrap modal max-width */
+@media (min-width: 320px) {
+
+  /* Wrapper handles horizontal scroll */
+  .progressbar-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    /* smooth scroll for iOS */
+    scrollbar-width: none;
+    /* hide scrollbar in Firefox */
+  }
+
+  .progressbar-wrapper::-webkit-scrollbar {
+    display: none;
+    /* hide scrollbar in Chrome/Safari/Edge */
+  }
+
+  /* Make items inline (not wrapping) */
+  .progressbar {
+    display: inline-flex;
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+}
+
+/* Center align for tablet and larger */
+@media (min-width: 768px) {
+  .progressbar-wrapper {
+    justify-content: center;
+    display: flex;
+    overflow: visible;
+    /* no scroll needed on larger screens */
+  }
+}
