@@ -355,7 +355,7 @@ def auto_migrate():
 
 def init_db():
     """Initialize database, apply migrations if available, and seed data once."""
-    from .super_admin.routes import seed_super_admin  # ensure local import
+    from .super_admin.routes import seed_super_admin  
 
     with app.app_context():
         try:
