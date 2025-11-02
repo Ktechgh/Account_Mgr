@@ -90,7 +90,7 @@ def seed_super_admin():
         ).first()
 
         if existing_admin:
-            logging.info("ℹ️ Super admin already exists. Skipping creation.")
+            logging.info(msg="ℹ️ Super admin already exists. Skipping creation.")
             return
 
         admin = User(
@@ -681,7 +681,7 @@ def secure_adashboard():
 
 
 @super_admin_secure.route(
-    rule="/edit_session/<int:session_id>", methods=["GET", "POST"]
+    rule="account_mgr/edit_session/<int:session_id>", methods=["GET", "POST"]
 )
 @login_required
 def edit_session(session_id):

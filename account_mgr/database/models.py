@@ -313,4 +313,12 @@ class CSAName(db.Model):
         return f"<CSAName {self.attendant_name}>"
 
 
+class DailyReport(db.Model):
+    __tablename__ = "daily_reports"
 
+    id = db.Column(db.Integer, primary_key=True)
+    report_title = db.Column(db.String(100), nullable=False)
+    report_body = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"User('{self.report_title}', '{self.report_body}')"

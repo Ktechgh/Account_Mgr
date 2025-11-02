@@ -7,6 +7,7 @@
   <title>Account_Mgr</title>
   <meta name="csrf-token" content="{{ csrf_token() }}" />
   <meta name="csrf-token_" content="{{ csrf_token() }}" />
+  <meta name="csrf--token" content="{{ csrf_token() }}">
 
   <link rel="icon" href="{{ url_for('static', filename='icons/web2.png') }}" />
 
@@ -131,6 +132,24 @@
           </a>
         </li>
         {% endblock cashsummary_nav %}
+
+        {% block daily__report %}
+        <li>
+          <a href="{{ url_for('access_control.daily_report')}}" class="cash-summary-trigger">
+            <i class="fas fa-clipboard-list"></i>
+            Daily-Reports
+          </a>
+        </li>
+        {% endblock daily__report %}
+
+        {% block report_access %}
+        <li>
+          <a href="#" class="access-control-trigger">
+            <i class="fas fa-user-lock"></i>
+            Access Control
+          </a>
+        </li>
+        {% endblock report_access %}
       </ul>
     </aside>
     {% endblock sidebar %}
@@ -163,8 +182,46 @@
         </form>
       </div>
     </div>
-
     {% endblock cashsummary_modal %}
+
+    {% block access_control_modal %}
+    <div id="accessControlModal" class="custom-modal-access">
+      <div class="custom-modal-content-access">
+        <span class="close-access-modal">&times;</span>
+        <h3>Access Control</h3>
+        <hr />
+    
+        <form method="POST" action="{{ url_for('access_control.access_control') }}">
+          {{ access_form.hidden_tag() }}
+    
+          <div class="col mb-3">
+            {{ access_form.access(class="form-select") }}
+          </div>
+    
+          <div class="col mb-3">
+            {{ access_form.start_date.label() }}
+            {{ access_form.start_date(class="form-control", type="date") }}
+          </div>
+    
+          <div class="col mb-3">
+            {{ access_form.end_date.label() }}
+            {{ access_form.end_date(class="form-control", type="date") }}
+          </div>
+    
+          <div class="col mb-3">
+            {{ access_form.admin_pin(id="admin_pin", class="form-control",
+            placeholder="Enter Admin PIN or Password") }}
+            <small id="pin-status" class="text-danger"></small>
+          </div>
+    
+          <div class="modal-footer">
+            {{ access_form.submit(class="btn btn-success btn-md custom-wide-button",
+            id="access-btn") }}
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endblock access_control_modal %}
 
     <!-- Transaction Report Modal -->
     {% block transreport_modal %}
@@ -203,15 +260,12 @@
     {% block main_content %}
     <div class="main-content">
       {% block content_header %}
-
       <!-- ================= S1/S2 ================= -->
       <div class="custom-card-header mb-3">
         <h3>Click plus button to enter meter readings.</h3>
         <button class="add-btn" id="openModalBtn_s1s2">+</button>
       </div>
       
-
-
       <!-- Bootstrap Stepper Modal -->
       <div class="modal fade" id="stepperModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">

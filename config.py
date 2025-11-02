@@ -66,18 +66,18 @@ class Config:
 
     # --- Cache ----
     CACHE_TYPE = "simple"
-    CACHE_DEFAULT_TIMEOUT = 300  # 5 minutes
+    CACHE_DEFAULT_TIMEOUT = 300
 
     # --- Flask-Session ---
-    SESSION_TYPE = "sqlalchemy"  # store sessions in DB
+    SESSION_TYPE = "sqlalchemy"
     SESSION_PERMANENT = True
     SESSION_USE_SIGNER = True
     SESSION_SQLALCHEMY_TABLE = "sessions"
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = True  # set True when on HTTPS
+    SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 4  # 4 days
-    WTF_CSRF_TIME_LIMIT = 43200  # 12 hours
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 4
+    WTF_CSRF_TIME_LIMIT = 43200
 
 
 class DevConfig(Config):
@@ -102,4 +102,3 @@ class ProdConfig(Config):
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {"options": "-c timezone=Africa/Accra"}
     }
-

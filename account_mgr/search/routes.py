@@ -488,7 +488,7 @@ def amount_to_words(amount):
         return f"{cedis_words} Ghana cedis only"
 
 
-@transactions_bp.route(rule="/cash_summary", methods=["GET", "POST"])
+@transactions_bp.route(rule="account_mgr/cash_summary", methods=["GET", "POST"])
 @login_required
 def cash_summary():
     form_cash = CashSummaryForm()
@@ -636,7 +636,7 @@ def cash_summary():
     )
 
 
-@transactions_bp.route(rule="/cash_summary/export", methods=["GET"])
+@transactions_bp.route(rule="account_mgr/cash_summary/export", methods=["GET"])
 @login_required
 def export_cash_summary():
     # read query params (expected format YYYY-MM-DD from HTML date inputs)

@@ -20,6 +20,7 @@ from flask_limiter.util import get_remote_address
 from flask_session import Session as FlaskSession
 from werkzeug.exceptions import RequestEntityTooLarge
 from alembic.runtime.environment import EnvironmentContext
+from account_mgr.access_control.form import AccessControlForm
 from flask_login import login_manager, LoginManager, current_user
 from flask import Flask, request, redirect, url_for, session, flash
 from account_mgr.search.form import TransactionReportForm, CashSummaryForm
@@ -239,6 +240,7 @@ def inject_default_forms():
             return {
                 "report": TransactionReportForm(),
                 "summary_form": CashSummaryForm(),
+                "access_form": AccessControlForm(),
             }
     except RequestEntityTooLarge:
         # In case request.content_length is already too big
@@ -257,6 +259,7 @@ from account_mgr.media_utils.utils import img_utils
 from account_mgr.search.routes import transactions_bp
 from account_mgr.account_settings.routes import account_
 from account_mgr.super_admin.routes import super_admin_secure
+from account_mgr.access_control.routes import access_control_bp
 from account_mgr.csa_registration.routes import attendants_registration
 
 
@@ -266,7 +269,9 @@ app.register_blueprint(account_, url_prefix="/")
 app.register_blueprint(img_utils, url_prefix="/")
 app.register_blueprint(meter_cash_api, url_prefix="/")
 app.register_blueprint(transactions_bp, url_prefix="/")
+app.register_blueprint(access_control_bp, url_prefix="/")
 app.register_blueprint(super_admin_secure, url_prefix="/")
+
 app.register_blueprint(attendants_registration, url_prefix="/")
 
 
