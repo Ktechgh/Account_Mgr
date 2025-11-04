@@ -96,6 +96,7 @@ class ProdConfig(Config):
 
     FLASK_ENV = "production"
     DEBUG = False
+    AUTO_MIGRATE = True
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or os.getenv(
         "DATABASE_URL_INTERNAL"
     )

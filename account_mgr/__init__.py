@@ -1,6 +1,5 @@
 import os
 import logging
-
 from flask_babel import Babel
 from dotenv import load_dotenv
 from sqlalchemy import inspect
