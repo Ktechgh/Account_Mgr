@@ -289,38 +289,6 @@ def has_schema_changes(alembic_cfg):
         return True
 
 
-# def auto_migrate():
-#     """Automatically handle migration and upgrade (for Render auto-deploy)."""
-#     try:
-#         migrations_dir = os.path.join(os.getcwd(), "migrations")
-
-#         # 1️⃣ Initialize migrations if folder doesn't exist
-#         if not os.path.exists(migrations_dir):
-#             os.system("flask db init")
-#             logging.info("Flask-Migrate initialized (migrations folder created).")
-
-#         # ✅ Correct alembic.ini path — it lives at project root
-#         alembic_cfg_path = os.path.join(os.getcwd(), "alembic.ini")
-#         if not os.path.exists(alembic_cfg_path):
-#             logging.warning("Alembic config missing, skipping diff check.")
-#             needs_migrate = True
-#         else:
-#             alembic_cfg = Config(alembic_cfg_path)
-#             needs_migrate = has_schema_changes(alembic_cfg)
-
-#         # 3️⃣ Run migrate + upgrade if needed
-#         if needs_migrate:
-#             logging.info("🚀 Schema changes detected — applying migrations...")
-#             os.system('flask db migrate -m "Auto-migrate (Render)"')
-#             os.system("flask db upgrade")
-#             logging.info("✅ Database auto-migrated successfully.")
-#         else:
-#             logging.info("✅ No schema changes detected — skipping migration.")
-
-#     except Exception as e:
-#         logging.error(f"❌ Auto migration failed: {e}")
-
-
 def auto_migrate():
     """Automatically handle migration and upgrade (for Render auto-deploy)."""
     try:
@@ -340,19 +308,6 @@ def auto_migrate():
             alembic_cfg = Config(alembic_cfg_path)
             needs_migrate = has_schema_changes(alembic_cfg)
 
-        # 🧠 NEW SAFETY CHECK: skip migration if tables already exist
-        from sqlalchemy import inspect
-
-        with app.app_context():
-            inspector = inspect(db.engine)
-            existing_tables = inspector.get_table_names()
-            # if some critical tables already exist, no need to auto-migrate
-            if existing_tables:
-                logging.info(
-                    "✅ Tables already exist. Skipping auto-migration to prevent duplicate creation."
-                )
-                needs_migrate = False
-
         # 3️⃣ Run migrate + upgrade if needed
         if needs_migrate:
             logging.info("🚀 Schema changes detected — applying migrations...")
@@ -364,6 +319,51 @@ def auto_migrate():
 
     except Exception as e:
         logging.error(f"❌ Auto migration failed: {e}")
+
+
+# def auto_migrate():
+#     """Automatically handle migration and upgrade (for Render auto-deploy)."""
+#     try:
+#         migrations_dir = os.path.join(os.getcwd(), "migrations")
+
+#         # 1️⃣ Initialize migrations if folder doesn't exist
+#         if not os.path.exists(migrations_dir):
+#             os.system("flask db init")
+#             logging.info("Flask-Migrate initialized (migrations folder created).")
+
+#         # ✅ Correct alembic.ini path — it lives at project root
+#         alembic_cfg_path = os.path.join(os.getcwd(), "alembic.ini")
+#         if not os.path.exists(alembic_cfg_path):
+#             logging.warning("Alembic config missing, skipping diff check.")
+#             needs_migrate = True
+#         else:
+#             alembic_cfg = Config(alembic_cfg_path)
+#             needs_migrate = has_schema_changes(alembic_cfg)
+
+#         # 🧠 NEW SAFETY CHECK: skip migration if tables already exist
+#         from sqlalchemy import inspect
+
+#         with app.app_context():
+#             inspector = inspect(db.engine)
+#             existing_tables = inspector.get_table_names()
+#             # if some critical tables already exist, no need to auto-migrate
+#             if existing_tables:
+#                 logging.info(
+#                     "✅ Tables already exist. Skipping auto-migration to prevent duplicate creation."
+#                 )
+#                 needs_migrate = False
+
+#         # 3️⃣ Run migrate + upgrade if needed
+#         if needs_migrate:
+#             logging.info("🚀 Schema changes detected — applying migrations...")
+#             os.system('flask db migrate -m "Auto-migrate (Render)"')
+#             os.system("flask db upgrade")
+#             logging.info("✅ Database auto-migrated successfully.")
+#         else:
+#             logging.info("✅ No schema changes detected — skipping migration.")
+
+#     except Exception as e:
+#         logging.error(f"❌ Auto migration failed: {e}")
 
 
 def init_db():
