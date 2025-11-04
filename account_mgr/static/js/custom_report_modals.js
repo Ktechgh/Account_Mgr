@@ -126,3 +126,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 // End of Admin PIN Verification
+
+// Auto open modal on page load
+document.addEventListener("DOMContentLoaded", function () {
+  var modalElement = document.getElementById("editReportModal");
+  if (modalElement) {
+    var modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  }
+});
+// End of Auto open modal on page load

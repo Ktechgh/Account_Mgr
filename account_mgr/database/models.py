@@ -319,6 +319,9 @@ class DailyReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     report_title = db.Column(db.String(100), nullable=False)
     report_body = db.Column(db.String(100), nullable=False)
+    date_created = db.Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
     def __repr__(self) -> str:
         return f"User('{self.report_title}', '{self.report_body}')"
