@@ -270,7 +270,6 @@ app.register_blueprint(meter_cash_api, url_prefix="/")
 app.register_blueprint(transactions_bp, url_prefix="/")
 app.register_blueprint(access_control_bp, url_prefix="/")
 app.register_blueprint(super_admin_secure, url_prefix="/")
-
 app.register_blueprint(attendants_registration, url_prefix="/")
 
 
