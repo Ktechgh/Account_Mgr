@@ -318,7 +318,7 @@ class DailyReport(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     report_title = db.Column(db.String(200), nullable=False)
-    report_body = db.Column(db.String(1000), nullable=False)
+    report_body = db.Column(db.String(600), nullable=False)
     date_created = db.Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
