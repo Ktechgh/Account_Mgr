@@ -251,6 +251,13 @@ def inject_default_forms():
     return {}
 
 
+def flask_db_init():
+    """Function to initialize Flask-Migrate and create the migrations folder."""
+    migrations_folder = os.path.join(os.getcwd(), "migrations")
+    if not os.path.exists(path=migrations_folder):
+        os.system(command="flask db init")
+
+
 """ Importing blueprints and routes from different modules."""
 from account_mgr.errors.routes import errors_
 from account_mgr.api.routes import meter_cash_api
@@ -273,134 +280,20 @@ app.register_blueprint(super_admin_secure, url_prefix="/")
 app.register_blueprint(attendants_registration, url_prefix="/")
 
 
-def has_schema_changes(alembic_cfg):
-    """Check if there are pending schema changes (True = needs migrate)."""
-    try:
-        script = ScriptDirectory.from_config(alembic_cfg)
-
-        def run_migrations(rev, context):
-            diff = context.get_current_revision() != script.get_current_head()
-            return diff
-
-        with EnvironmentContext(alembic_cfg, script, fn=run_migrations):
-            return run_migrations(None, None)
-    except Exception:
-        # Safe fallback: assume migration needed if diff check fails
-        return True
-
-
-def auto_migrate():
-    """Automatically handle migration and upgrade (for Render auto-deploy)."""
-    try:
-        migrations_dir = os.path.join(os.getcwd(), "migrations")
-
-        # 1️⃣ Initialize migrations if folder doesn't exist
-        if not os.path.exists(migrations_dir):
-            os.system("flask db init")
-            logging.info("Flask-Migrate initialized (migrations folder created).")
-
-        # ✅ Correct alembic.ini path — it lives at project root
-        alembic_cfg_path = os.path.join(os.getcwd(), "alembic.ini")
-        if not os.path.exists(alembic_cfg_path):
-            logging.warning("Alembic config missing, skipping diff check.")
-            needs_migrate = True
-        else:
-            alembic_cfg = Config(alembic_cfg_path)
-            needs_migrate = has_schema_changes(alembic_cfg)
-
-        # 3️⃣ Run migrate + upgrade if needed
-        if needs_migrate:
-            logging.info("🚀 Schema changes detected — applying migrations...")
-            os.system('flask db migrate -m "Auto-migrate (Render)"')
-            os.system("flask db upgrade")
-            logging.info("✅ Database auto-migrated successfully.")
-        else:
-            logging.info("✅ No schema changes detected — skipping migration.")
-
-    except Exception as e:
-        logging.error(f"❌ Auto migration failed: {e}")
-
-
-# def auto_migrate():
-#     """Automatically handle migration and upgrade (for Render auto-deploy)."""
-#     try:
-#         migrations_dir = os.path.join(os.getcwd(), "migrations")
-
-#         # 1️⃣ Initialize migrations if folder doesn't exist
-#         if not os.path.exists(migrations_dir):
-#             os.system("flask db init")
-#             logging.info("Flask-Migrate initialized (migrations folder created).")
-
-#         # ✅ Correct alembic.ini path — it lives at project root
-#         alembic_cfg_path = os.path.join(os.getcwd(), "alembic.ini")
-#         if not os.path.exists(alembic_cfg_path):
-#             logging.warning("Alembic config missing, skipping diff check.")
-#             needs_migrate = True
-#         else:
-#             alembic_cfg = Config(alembic_cfg_path)
-#             needs_migrate = has_schema_changes(alembic_cfg)
-
-#         # 🧠 NEW SAFETY CHECK: skip migration if tables already exist
-#         from sqlalchemy import inspect
-
-#         with app.app_context():
-#             inspector = inspect(db.engine)
-#             existing_tables = inspector.get_table_names()
-#             # if some critical tables already exist, no need to auto-migrate
-#             if existing_tables:
-#                 logging.info(
-#                     "✅ Tables already exist. Skipping auto-migration to prevent duplicate creation."
-#                 )
-#                 needs_migrate = False
-
-#         # 3️⃣ Run migrate + upgrade if needed
-#         if needs_migrate:
-#             logging.info("🚀 Schema changes detected — applying migrations...")
-#             os.system('flask db migrate -m "Auto-migrate (Render)"')
-#             os.system("flask db upgrade")
-#             logging.info("✅ Database auto-migrated successfully.")
-#         else:
-#             logging.info("✅ No schema changes detected — skipping migration.")
-
-#     except Exception as e:
-#         logging.error(f"❌ Auto migration failed: {e}")
-
-
 def init_db():
-    """Initialize database, apply migrations if available, and seed data once."""
+    """Initialize database by creating tables and seeding super admin."""
     from .super_admin.routes import seed_super_admin
 
     with app.app_context():
-        try:
-            # --- 1️⃣ Auto-migrate on Render (if enabled) ---
-            if os.getenv("AUTO_MIGRATE", "1") == "1":
-                auto_migrate()
-
-            # --- 2️⃣ Create tables if they don’t exist ---
-            inspector = inspect(db.engine)
-            tables = inspector.get_table_names()
-
-            if "users" not in tables or "tenants" not in tables:
-                db.create_all()
-                logging.info("Tables created successfully.")
-            else:
-                logging.info("Tables already exist. Skipping create_all().")
-
-            # --- 3️⃣ Seed default data ---
-            seed_super_admin()
-            logging.info("Database seeded successfully (checked or created admin).")
-
-        except Exception as e:
-            logging.error(f"❌ init_db() failed: {e}")
+        flask_db_init()
+        db.create_all() 
+        seed_super_admin()
+        app.logger.info("Database initialized and super admin seeded.")
 
 
-import sys
-
-if os.getenv("AUTO_MIGRATE", "1") == "1" and not any(
-    cmd in sys.argv for cmd in ["db", "shell"]
-):
-    try:
-        with app.app_context():
-            init_db()
-    except Exception as e:
-        app.logger.error(f"❌ Auto DB init failed on startup: {e}")
+# Safe initialization on Render startup
+try:
+    with app.app_context():
+        init_db()
+except Exception as e:
+    app.logger.error(f"❌ Failed to initialize DB on startup: {e}")
